@@ -1,2 +1,2 @@
-# GestureContolForHue
+# GestureControlForHue
 SEM Project for MUS
