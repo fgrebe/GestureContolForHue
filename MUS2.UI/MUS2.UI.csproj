@@ -105,7 +105,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="GestureRecognizer.cs" />
-    <Compile Include="HueConnector.cs" />
     <Compile Include="KinectDataManager.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
