@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Gesture Name="SyntheticHLine">
+  <Descriptors>
+    <PointDescriptor>
+      <Points Count="21">
+        <Point X="0.5" Y="0.1" T="0" />
+		<Point X="0.45" Y="0.1" T="0" />
+		<Point X="0.4" Y="0.1" T="0" />
+		<Point X="0.35" Y="0.1" T="0" />
+        <Point X="0.3" Y="0.1" T="0" />
+		<Point X="0.25" Y="0.1" T="0" />
+        <Point X="0.2" Y="0.1" T="0" />
+		<Point X="0.15" Y="0.1" T="0" />
+        <Point X="0.1" Y="0.1" T="0" />
+		<Point X="0.05" Y="0.1" T="0" />
+        <Point X="0.0" Y="0.1" T="0" />
+		<Point X="-0.05" Y="0.1" T="0" />
+		<Point X="-0.1" Y="0.1" T="0" />
+		<Point X="-0.15" Y="0.1" T="0" />
+        <Point X="-0.2" Y="0.1" T="0" />
+		<Point X="-0.25" Y="0.1" T="0" />
+        <Point X="-0.3" Y="0.1" T="0" />
+		<Point X="-0.35" Y="0.1" T="0" />
+        <Point X="-0.4" Y="0.1" T="0" />
+		<Point X="-0.45" Y="0.1" T="0" />
+        <Point X="-0.5" Y="0.1" T="0" />		
+      </Points>
+    </PointDescriptor>
+  </Descriptors>
+</Gesture>
