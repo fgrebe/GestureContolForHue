@@ -4,7 +4,8 @@ using System.Drawing;
 using System.Linq;
 using System.Speech.Recognition;
 
-namespace MUS2 {
+namespace MUS2.Speech {
+
   class SpeechRecognition {
 
     private Color lampColor;
