@@ -17,7 +17,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
 
-namespace MUS2 {
+namespace MUS2.UI {
 
   public partial class SmallMainWindow : Window {
     #region members

@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-namespace WpfApplication1 {
+namespace MUS2.UI {
 
   public partial class App : Application {
   }

@@ -1,4 +1,4 @@
-﻿<Window x:Class="MUS2.SmallMainWindow"
+﻿<Window x:Class="MUS2.UI.SmallMainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Microsoft Kinect and Gesture Recognition Fundamentals (small screens)" Height="768" Width="1024" Loaded="Window_Loaded" Closed="Window_Closed">
