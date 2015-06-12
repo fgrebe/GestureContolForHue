@@ -1,20 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-using Microsoft.Kinect;
-using System.Diagnostics;
-using GestureFabric.Persistence;
-using GestureFabric.Core;
+﻿using GestureFabric;
 using GestureFabric.Config;
-using GestureFabric;
+using GestureFabric.Core;
+using GestureFabric.Persistence;
 using KinectUtils.MovementRecorder;
 using KinectUtils.MovementRecorder.GestureFabriceExport; // for Recognizer
 using KinectUtils.OnlineFilter;
+using Microsoft.Kinect;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 
 
-namespace KinectAndGestureRecognitionFundamentals
+namespace MUS2
 {
     public delegate void GestureRecognizedEventHandler(ResultList result);
 
@@ -132,32 +129,32 @@ namespace KinectAndGestureRecognitionFundamentals
             Debug.WriteLine("#### gesture definition before applying the algorithm");
             ShowGestureDescription(simpleSet);  // here we have the full number of points (e.g. 64);    
         }
-		// just for understanding the data structure
-		private void ShowGestureDescription(GestureSet gestureSet) {
-		  foreach (Gesture gesture in gestureSet.Gestures)
+    // just for understanding the data structure
+    private void ShowGestureDescription(GestureSet gestureSet) {
+      foreach (Gesture gesture in gestureSet.Gestures)
             {
-				Debug.WriteLine("*** ShowGestureDescription: gesture:" + gesture.Name);
+        Debug.WriteLine("*** ShowGestureDescription: gesture:" + gesture.Name);
                 IList<IDescriptor> descriptors = gesture.Descriptors;
                 foreach (IDescriptor d in descriptors)
                 {
                     if (d is PointDescriptor)
                     {
                         PointDescriptor pd = (PointDescriptor) d;
-						Debug.WriteLine("*** gesture:" + gesture.Name + " has " + pd.Count + " points");
-						double minimumX = double.MaxValue;
-						double maximumX = double.MinValue;
-						foreach (PointD p in pd.Points)
-						{
-							//Debug.WriteLine("*** :" + "(" + p.X + "," + p.Y + ")");
-							minimumX = Math.Min(minimumX, p.X);
-							maximumX = Math.Max(maximumX, p.X);
-						}
-						//Debug.WriteLine("*** minimumX: " + minimumX);
-						//Debug.WriteLine("*** maximumX: " + maximumX);
+            Debug.WriteLine("*** gesture:" + gesture.Name + " has " + pd.Count + " points");
+            double minimumX = double.MaxValue;
+            double maximumX = double.MinValue;
+            foreach (PointD p in pd.Points)
+            {
+              //Debug.WriteLine("*** :" + "(" + p.X + "," + p.Y + ")");
+              minimumX = Math.Min(minimumX, p.X);
+              maximumX = Math.Max(maximumX, p.X);
+            }
+            //Debug.WriteLine("*** minimumX: " + minimumX);
+            //Debug.WriteLine("*** maximumX: " + maximumX);
                     }
                 }
             }
-		}
+    }
         public void RecognizeRecordedGesture(JointType jointId)
         {
             var gesturePoints = recorder.GetGesturePoints(jointId, ProjectionPlane.XY_PLANE);

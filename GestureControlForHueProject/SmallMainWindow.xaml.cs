@@ -1,32 +1,23 @@
-﻿using System;
+﻿using GestureFabric.Core;
+using GestureFabric.Persistence;
+using KinectUtils.MovementRecorder;
+using KinectUtils.MovementRecorder.GestureFabriceExport;
+using KinectUtils.RecorderTypeDefinitions;
+using Microsoft.Kinect;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
-using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-using Microsoft.Kinect;
-using System.Diagnostics;
 
-using KinectUtils.MovementRecorder;
-using System.Threading;
-using KinectUtils.RecorderTypeDefinitions;
-using GestureFabric.Core;
-using GestureFabric.Persistence;
-using GestureFabric.Config;
-using KinectUtils.MovementRecorder.GestureFabriceExport;
-using KinectUtils.OnlineFilter;
-using System.Threading.Tasks;
-
-
-namespace KinectAndGestureRecognitionFundamentals
+namespace MUS2
 {
     /// <summary>
     /// Interaction logic for SmallMainWindow.xaml
@@ -142,7 +133,7 @@ namespace KinectAndGestureRecognitionFundamentals
                     // depth stream
                     kinectDataMgr.Kinect.DepthStream.Enable(DepthImageFormat.Resolution320x240Fps30);
                     kinectDataMgr.Kinect.SkeletonStream.Enable(); // To identify players
-					// process and show raw depth data
+          // process and show raw depth data
                     kinectDataMgr.Kinect.DepthFrameReady += Kinect_DepthFrameReady_Raw;
                     // process and show depth stream data with color (color = distance)
                     kinectDataMgr.Kinect.DepthFrameReady += Kinect_DepthFrameReady_Colored;
@@ -193,34 +184,34 @@ namespace KinectAndGestureRecognitionFundamentals
                 byte[] pixels = new byte[colorFrame.PixelDataLength];
                 colorFrame.CopyPixelDataTo(pixels);
                 int stride = colorFrame.Width * 4;
-				/* imageRaw UI elements has been remove for screen resolution (1024x768) reasons
+        /* imageRaw UI elements has been remove for screen resolution (1024x768) reasons
                 imageRaw.Source =
                     BitmapSource.Create(colorFrame.Width, colorFrame.Height,
                     96, 96, PixelFormats.Bgr32, null, pixels, stride);
-				 * */
+         * */
             }
         }
  
         #endregion
         #region depth data processing
         // ############### depth data ##############
-		void Kinect_DepthFrameReady_Raw(object sender, DepthImageFrameReadyEventArgs e)
-		{
-			using (DepthImageFrame depthFrame = e.OpenDepthImageFrame())
-			{
-				if (depthFrame == null)
-				{
-					return;
-				}
-				byte[] pixels = GenerateColoredBytes(depthFrame);
-				//number of bytes per row width * 4 (B,G,R,Empty)
-				int stride = depthFrame.Width * 4;
-				//create image
-				imageDepthRaw.Source =
-					BitmapSource.Create(depthFrame.Width, depthFrame.Height,
-					96, 96, PixelFormats.Bgr32, null, pixels, stride);
-			}
-		}
+    void Kinect_DepthFrameReady_Raw(object sender, DepthImageFrameReadyEventArgs e)
+    {
+      using (DepthImageFrame depthFrame = e.OpenDepthImageFrame())
+      {
+        if (depthFrame == null)
+        {
+          return;
+        }
+        byte[] pixels = GenerateColoredBytes(depthFrame);
+        //number of bytes per row width * 4 (B,G,R,Empty)
+        int stride = depthFrame.Width * 4;
+        //create image
+        imageDepthRaw.Source =
+          BitmapSource.Create(depthFrame.Width, depthFrame.Height,
+          96, 96, PixelFormats.Bgr32, null, pixels, stride);
+      }
+    }
         private byte[] GenerateColoredBytes(DepthImageFrame depthFrame)
         {
             Int32 playerDistance = 0;
@@ -308,7 +299,7 @@ namespace KinectAndGestureRecognitionFundamentals
                 if (imageFrame != null)
                 {
 
-					// 
+          // 
                     WriteableBitmap outputBitmap = new WriteableBitmap(
                         imageFrame.Width,
                         imageFrame.Height,
@@ -323,8 +314,8 @@ namespace KinectAndGestureRecognitionFundamentals
 
                     byte[] depthFrame32;
                     depthFrame32 = new byte[imageFrame.Width * imageFrame.Height * Bgr32BytesPerPixel];
-					// Converts a 16-bit grayscale depth frame which includes player indexes into a 32-bit frame
-					// that displays different players in different colors
+          // Converts a 16-bit grayscale depth frame which includes player indexes into a 32-bit frame
+          // that displays different players in different colors
                     byte[] convertedDepthBits = this.ConvertDepthFrame(pixelData, depthFrame32, ((KinectSensor)sender).DepthStream);
                     outputBitmap.WritePixels(
                         new Int32Rect(0, 0, imageFrame.Width, imageFrame.Height),
@@ -351,7 +342,7 @@ namespace KinectAndGestureRecognitionFundamentals
 
                 // transform 13-bit depth information into an 8-bit intensity appropriate
                 // for display (we disregard information in most significant bit)
-				// The '~' operator is the bitwise negation operator.
+        // The '~' operator is the bitwise negation operator.
                 byte intensity = (byte)(~(realDepth >> 4));
 
                 if (player == 0 && realDepth == 0) // too near
@@ -404,7 +395,7 @@ namespace KinectAndGestureRecognitionFundamentals
                     if (allSkeletons == null)
                         return;
                     // get the first tracked skeleton    
-					// if state is not tracked, then we do get lot of useless position data (e.g X/Y 0/0)
+          // if state is not tracked, then we do get lot of useless position data (e.g X/Y 0/0)
                     Skeleton[] skeletonArray = new Skeleton[allSkeletons.SkeletonArrayLength];
                     allSkeletons.CopySkeletonDataTo(skeletonArray);
                     Skeleton skeleton = (from s in skeletonArray
@@ -530,77 +521,77 @@ namespace KinectAndGestureRecognitionFundamentals
         #endregion
         #region basic control
         // ############### basic control ##############
-		bool isElevationTaskOutstanding = false;
-		int targetElevationAngle = 0;
+    bool isElevationTaskOutstanding = false;
+    int targetElevationAngle = 0;
 
 
-		private void sdrElevationAngle_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-		{
-			targetElevationAngle = Convert.ToInt32(e.NewValue.ToString());
-			// just for safety, because we get called when GUI is loaded and no nui instance is available
-			if ((kinectDataMgr != null) && (kinectDataMgr.Kinect.Status == KinectStatus.Connected) && (kinectDataMgr.Kinect.IsRunning))
-			{
-				try
-				{
-					if (!isElevationTaskOutstanding)
-					{
-						StartElevationTask();
-					}
-				}
-				catch (Exception ex)
-				{
-					Debug.WriteLine(ex.Message);
-				}
-			}
-		}
+    private void sdrElevationAngle_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+    {
+      targetElevationAngle = Convert.ToInt32(e.NewValue.ToString());
+      // just for safety, because we get called when GUI is loaded and no nui instance is available
+      if ((kinectDataMgr != null) && (kinectDataMgr.Kinect.Status == KinectStatus.Connected) && (kinectDataMgr.Kinect.IsRunning))
+      {
+        try
+        {
+          if (!isElevationTaskOutstanding)
+          {
+            StartElevationTask();
+          }
+        }
+        catch (Exception ex)
+        {
+          Debug.WriteLine(ex.Message);
+        }
+      }
+    }
 
-		private void StartElevationTask()
-		{
-			KinectSensor sensor = kinectDataMgr.Kinect;
-			int lastSetElevationAngle = int.MinValue;
+    private void StartElevationTask()
+    {
+      KinectSensor sensor = kinectDataMgr.Kinect;
+      int lastSetElevationAngle = int.MinValue;
 
-			if (sensor != null)
-			{
-				isElevationTaskOutstanding = true;
-				Task.Factory.StartNew(
-				  () =>
-				  {
-					  int angleToSet = targetElevationAngle;
-					  // Keep adjusting the elevation angle until we "match".
-					  while ((lastSetElevationAngle != angleToSet) && sensor.IsRunning)
-					  {
-						  // Note: Change angle as few times (max 15 times every 20 sec.) as possible and
-						  // wait at least 1 sec. after a call. So wee wait 1350 ms.
-						  // see: http://msdn.microsoft.com/en-us/library/microsoft.kinect.kinectsensor.elevationangle.aspx
-						  sensor.ElevationAngle = angleToSet;  // set new angle
-						  lastSetElevationAngle = angleToSet;
-						  Thread.Sleep(1350);
-						  angleToSet = targetElevationAngle;
-					  }
-				  }).ContinueWith(
-				  results =>
-				  {
-					  if (results.IsFaulted)
-					  {
-						  var exception = results.Exception;
-						  Debug.WriteLine("Set Elevation Task failed with exception: " + exception);
-					  }
-					  // In case more request to change the evelation angle appeared,
-					  // start the task again.
-					  this.Dispatcher.BeginInvoke((Action)(() =>
-					  {
-						  if (targetElevationAngle != lastSetElevationAngle)
-						  {
-							  StartElevationTask();
-						  }
-						  else
-						  {
-							  isElevationTaskOutstanding = false;
-						  }
-					  }));
-				  });
-			}
-		}
+      if (sensor != null)
+      {
+        isElevationTaskOutstanding = true;
+        Task.Factory.StartNew(
+          () =>
+          {
+            int angleToSet = targetElevationAngle;
+            // Keep adjusting the elevation angle until we "match".
+            while ((lastSetElevationAngle != angleToSet) && sensor.IsRunning)
+            {
+              // Note: Change angle as few times (max 15 times every 20 sec.) as possible and
+              // wait at least 1 sec. after a call. So wee wait 1350 ms.
+              // see: http://msdn.microsoft.com/en-us/library/microsoft.kinect.kinectsensor.elevationangle.aspx
+              sensor.ElevationAngle = angleToSet;  // set new angle
+              lastSetElevationAngle = angleToSet;
+              Thread.Sleep(1350);
+              angleToSet = targetElevationAngle;
+            }
+          }).ContinueWith(
+          results =>
+          {
+            if (results.IsFaulted)
+            {
+              var exception = results.Exception;
+              Debug.WriteLine("Set Elevation Task failed with exception: " + exception);
+            }
+            // In case more request to change the evelation angle appeared,
+            // start the task again.
+            this.Dispatcher.BeginInvoke((Action)(() =>
+            {
+              if (targetElevationAngle != lastSetElevationAngle)
+              {
+                StartElevationTask();
+              }
+              else
+              {
+                isElevationTaskOutstanding = false;
+              }
+            }));
+          });
+      }
+    }
 
         #endregion
 
@@ -821,68 +812,68 @@ namespace KinectAndGestureRecognitionFundamentals
         }
         #endregion
         #region recognition
-		private void InitializeGestureRecognition()
-		{
-			List<SolidColorBrush>.Enumerator e = brushes.GetEnumerator();
-			foreach (GestureSet gestureSet in kinectDataMgr.GestureSets)
-			{
-				foreach (Gesture gesture in gestureSet.Gestures)
-				{
-					if (e.MoveNext() == false)
-					{
-						// we have reached the end of the colors so we start over
-						e = brushes.GetEnumerator();
-						e.MoveNext();
-					}
-					SolidColorBrush b = e.Current;
-					DrawPredefinedGesture(gesture, canvasPredefinedGestures, e.Current);
-				}
-			}
-		}
-		private void DrawPredefinedGesture(Gesture gesture, Canvas canvas, SolidColorBrush brush)
-		{
-			Debug.WriteLine("*** DrawPredefinedGesture: gesture:" + gesture.Name);
-			IList<IDescriptor> descriptors = gesture.Descriptors;
-			foreach (IDescriptor d in descriptors)
-			{
-				if (d is PointDescriptor)
-				{
-					PointDescriptor pd = (PointDescriptor)d;
-					Debug.WriteLine("*** gesture:" + gesture.Name + " has " + pd.Count + " points");
-					DrawGestureInCanvas(this.canvasPredefinedGestures, pd.Points, brush);
-				}
-			}
-		}
-		private void DrawGestureInCanvas(Canvas canvas, IList<PointD> points, SolidColorBrush brush)
-		{
-			// we want to fit the gesture into the canvas, so we have to find factors for the drawing area
-			double minX = 0, maxX = 0, minY = 0, maxY = 0;
-			double expandFactorX = 1, expandFactorY = 1;
-			findDrawingFactors(canvas, points, ref minX, ref maxX, ref minY, ref maxY, ref expandFactorX, ref expandFactorY);
+    private void InitializeGestureRecognition()
+    {
+      List<SolidColorBrush>.Enumerator e = brushes.GetEnumerator();
+      foreach (GestureSet gestureSet in kinectDataMgr.GestureSets)
+      {
+        foreach (Gesture gesture in gestureSet.Gestures)
+        {
+          if (e.MoveNext() == false)
+          {
+            // we have reached the end of the colors so we start over
+            e = brushes.GetEnumerator();
+            e.MoveNext();
+          }
+          SolidColorBrush b = e.Current;
+          DrawPredefinedGesture(gesture, canvasPredefinedGestures, e.Current);
+        }
+      }
+    }
+    private void DrawPredefinedGesture(Gesture gesture, Canvas canvas, SolidColorBrush brush)
+    {
+      Debug.WriteLine("*** DrawPredefinedGesture: gesture:" + gesture.Name);
+      IList<IDescriptor> descriptors = gesture.Descriptors;
+      foreach (IDescriptor d in descriptors)
+      {
+        if (d is PointDescriptor)
+        {
+          PointDescriptor pd = (PointDescriptor)d;
+          Debug.WriteLine("*** gesture:" + gesture.Name + " has " + pd.Count + " points");
+          DrawGestureInCanvas(this.canvasPredefinedGestures, pd.Points, brush);
+        }
+      }
+    }
+    private void DrawGestureInCanvas(Canvas canvas, IList<PointD> points, SolidColorBrush brush)
+    {
+      // we want to fit the gesture into the canvas, so we have to find factors for the drawing area
+      double minX = 0, maxX = 0, minY = 0, maxY = 0;
+      double expandFactorX = 1, expandFactorY = 1;
+      findDrawingFactors(canvas, points, ref minX, ref maxX, ref minY, ref maxY, ref expandFactorX, ref expandFactorY);
 
-			// define a polyline
-			PointCollection pointsToDraw = new PointCollection();
-			foreach (PointD p in points)
-			{
-				// add points to collection
-				double newX = Math.Round(p.X, 2) - Math.Round(minX, 2);
-				// mirror it, because 0 is for the X coordinates in the canvas on top, 
-				// and for the recorded kinect coordinates on the bottom
-				newX = canvas.Height - newX;
+      // define a polyline
+      PointCollection pointsToDraw = new PointCollection();
+      foreach (PointD p in points)
+      {
+        // add points to collection
+        double newX = Math.Round(p.X, 2) - Math.Round(minX, 2);
+        // mirror it, because 0 is for the X coordinates in the canvas on top, 
+        // and for the recorded kinect coordinates on the bottom
+        newX = canvas.Height - newX;
 
-				double newY = Math.Round(p.Y, 2) - Math.Round(minY, 2);
-				newX = newX * expandFactorX + 12; // why add 12 to get the needed shift to the center? (Werner)
-				newY = newY * expandFactorY;
+        double newY = Math.Round(p.Y, 2) - Math.Round(minY, 2);
+        newX = newX * expandFactorX + 12; // why add 12 to get the needed shift to the center? (Werner)
+        newY = newY * expandFactorY;
 
-				pointsToDraw.Add(new Point(newX, newY));
-			}
-			Polyline line = new Polyline();
-			line.Points = pointsToDraw;
-			line.Stroke = brush;
-			line.StrokeThickness = 1;
+        pointsToDraw.Add(new Point(newX, newY));
+      }
+      Polyline line = new Polyline();
+      line.Points = pointsToDraw;
+      line.Stroke = brush;
+      line.StrokeThickness = 1;
 
-			canvas.Children.Add(line);
-		}
+      canvas.Children.Add(line);
+    }
         private void findDrawingFactors(Canvas canvas, IList<PointD> points, ref double minX, ref double maxX,
             ref double minY, ref double maxY, ref double expandFactorX, ref double expandFactorY)
         {
@@ -897,12 +888,12 @@ namespace KinectAndGestureRecognitionFundamentals
                 double x = p.X;
                 double y = p.Y;
                 maxX = Math.Max(x, maxX);
-				minX = Math.Min(x, minX);
+        minX = Math.Min(x, minX);
                 maxY = Math.Max(y, maxY);
                 minY = Math.Min(y, minY);
             }
-			//Debug.WriteLine("*** minX: " + minX);
-			//Debug.WriteLine("*** maxX: " + maxX);
+      //Debug.WriteLine("*** minX: " + minX);
+      //Debug.WriteLine("*** maxX: " + maxX);
             double extentX = maxX - minX;
             double extentY = maxY - minY;
             expandFactorX = canvas.Width / extentX;
@@ -1024,7 +1015,7 @@ namespace KinectAndGestureRecognitionFundamentals
                 Debug.WriteLine("smoothingFactor for input data {0}", smoothingFactor);
                 kinectDataMgr.Recorder.ApplyFilter(new LowpassFilter(smoothingFactor));
             }
-			// we only consider one plane (e.g. XY)
+      // we only consider one plane (e.g. XY)
             var gesturePoints = kinectDataMgr.Recorder.GetGesturePoints(jointToBeDisplayed, ProjectionPlane.XY_PLANE);
             if (gesturePoints.Count > 0)
             {
