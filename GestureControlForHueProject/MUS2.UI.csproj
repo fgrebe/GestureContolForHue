@@ -7,8 +7,8 @@
     <ProjectGuid>{05FC9803-2A7A-42CF-A13D-7293DF157C76}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MUS2</RootNamespace>
-    <AssemblyName>MUS2</AssemblyName>
+    <RootNamespace>MUS2.UI</RootNamespace>
+    <AssemblyName>MUS2.UI</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -76,8 +76,6 @@
     <Reference Include="Microsoft.Kinect, Version=1.8.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Speech" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -98,7 +96,6 @@
     <Compile Include="SmallMainWindow.xaml.cs">
       <DependentUpon>SmallMainWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="SpeechRecognition.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -147,10 +144,19 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Gesture Definitions\arrow_gesture.xml" />
-    <Resource Include="Gesture Definitions\circle_gesture.xml" />
-    <Resource Include="Gesture Definitions\line_gesture.xml" />
-    <Resource Include="Grammar\Grammar.xml" />
+    <Resource Include="GestureDefinitions\arrow_gesture.xml" />
+    <Resource Include="GestureDefinitions\circle_gesture.xml" />
+    <Resource Include="GestureDefinitions\line_gesture.xml" />
+    <Resource Include="GestureDefinitions\triangle_gesture.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="GestureDefinitions\GestureFabric.CurrentGesatureSet.xml" />
+    <Resource Include="GestureDefinitions\GestureFabric.CurrentGestureSet.xml" />
+    <Resource Include="GestureDefinitions\RecordedHLine.xml" />
+    <Resource Include="GestureDefinitions\SyntheticHLine - Copy.xml" />
+    <Resource Include="GestureDefinitions\SyntheticHLine.short.xml" />
+    <Resource Include="GestureDefinitions\SyntheticHLine.xml" />
+    <Resource Include="GestureDefinitions\test.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
