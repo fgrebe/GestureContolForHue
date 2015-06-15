@@ -38,8 +38,11 @@ namespace MUS2.Hue {
 
     /*
      * intensity: of the colors and the brightness is at its maximum by setting the “sat” and “bri” resources to 255.
-     * saturation: changes color intensits -> should be 255
-     * brightness: changes brightness...
+     * saturation: changes color intensits -> should be 255. Reducing the saturation takes this hue and moves 
+     *             it in a straight line towards the white point. So "sat":255 always gives the most saturated 
+     *             colors and reducing it to "sat":200 makes them less intense and more white.
+     * brightness: This is the brightness of a light from its minimum brightness 0 to its maximum brightness 255 
+     *             (note minimum brightness is not off). 
      * hue (a measure of color): runs from 0 to 65535  -> changes color
      */
     public void SetBrightness(int brightness, HueClient client, List<string> lamps = null) {
