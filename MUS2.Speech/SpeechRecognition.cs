@@ -7,16 +7,6 @@ using System.Linq;
 using System.Speech.Recognition;
 
 namespace MUS2.Speech {
-
-  public class Listener {
-    public void Subscribe(SpeechRecognition s) {
-      s.sh += new SpeechRecognition.SpeechHandler(SpeechRecognized);
-    }
-
-    private void SpeechRecognized(SpeechRecognition s, SpeechRecognizedEventArgs e) {
-    }
-  }
-
   public class SpeechRecognition {
 
     public delegate void SpeechHandler(SpeechRecognition s, SpeechRecognizedEventArgs e);
@@ -167,13 +157,13 @@ namespace MUS2.Speech {
 
     private void ShowRecognitionResult(SpeechRecognizedEventArgs e) {
       Debug.WriteLine("--- START recognition results ---");
-      // START_WERNER_1
+
       RecognitionResult result = e.Result;
       Debug.WriteLine("confidence: {0}", result.Confidence);
       foreach (RecognizedWordUnit word in result.Words) {
         Debug.WriteLine("word: {0} confidence: {1}", word.Text, word.Confidence);
       }
-      // END_WERNER_1
+
       Debug.WriteLine("--- END   recognition results ---");
     }
   }

@@ -15,8 +15,6 @@ namespace MUS2.Speech {
 
       SpeechRecognition rec = new SpeechRecognition();
       rec.EnableSpeech(); // enables recognition and loads grammar file
-      //Listener l = new Listener();
-      //l.Subscribe(rec);
       _completed.WaitOne(); // wait until speech recognition is completed
     }
   }
