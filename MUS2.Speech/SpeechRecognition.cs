@@ -6,57 +6,67 @@ using System.Speech.Recognition;
 
 namespace MUS2.Speech {
 
-  class SpeechRecognition {
+  public class Listener {
+    public void Subscribe(SpeechRecognition s) {
+      s.sh += new SpeechRecognition.SpeechHandler(SpeechRecognized);
+    }
+
+    private void SpeechRecognized(SpeechRecognition s, SpeechRecognizedEventArgs e) {
+    }
+  }
+
+  public class SpeechRecognition {
+
+    public delegate void SpeechHandler(SpeechRecognition s, SpeechRecognizedEventArgs e);
+    public event SpeechHandler sh;
 
     private Color lampColor;
     private int brightness;
 
-    private bool speechEnabled = false;
+    private bool speechEnabled = true; // activated by checkbox
     private bool speechInitialized = false;
     private SpeechRecognizer recognizer;
     private Grammar grammar;
 
-    private bool EnableSpeech() {
+    // Standardconstructor
+    public SpeechRecognition() {
+
+    }
+
+    public bool EnableSpeech() {
       Debug.WriteLine("enabling speech ...");
       Debug.Assert(speechEnabled, "speechEnabled must be true in EnableSpeech");
 
-      // START_WERNER_1
       if (speechInitialized == false) {
         InitializeSpeechWithGrammarFile();
       }
       recognizer.Enabled = true;
       Debug.WriteLine("Recognition state is now: {0} ", recognizer.State);
-      // END_WERNER_1
       return true;
     }
 
-    /// <summary>
-    ///     This is a private function that stops speech recognition.
-    /// </summary>
-    /// <returns></returns>
-    private bool DisableSpeech() {
-      Debug.Assert(speechInitialized,
-                   "speech must be initialized in DisableSpeech");
-      // START_WERNER_1
+    public bool DisableSpeech() {
+      Debug.Assert(speechInitialized,"speech must be initialized in DisableSpeech");
       if (speechInitialized) {
         // Putting the recognition context to disabled state will 
         // stop speech recognition. Changing the state to enabled 
         // will start recognition again.
-
         recognizer.Enabled = false;
         Debug.WriteLine("Recognition state is now: {0} ", recognizer.State);
         Debug.WriteLine("disabling speech ...");
       }
-      // END_WERNER_1
       return true;
     }
 
+    // Called during EnableSpeech()
     private void InitializeSpeechWithGrammarFile() {
       Debug.WriteLine("Initializing SAPI objects...");
       try {
         recognizer = new SpeechRecognizer();
         grammar = new Grammar(@"..\..\Grammar\Grammar.xml");
+        // Set event handler
         grammar.SpeechRecognized += grammar_SpeechRecognized;
+
         recognizer.LoadGrammar(grammar);
         speechInitialized = true;
       }
@@ -69,8 +79,7 @@ namespace MUS2.Speech {
       }
     }
 
-    void grammar_SpeechRecognized(object sender, SpeechRecognizedEventArgs e) {
-      // START_WERNER_1
+    public void grammar_SpeechRecognized(object sender, SpeechRecognizedEventArgs e) {
       // show result on console
       //this.ShowRecognitionResult(e);
       // our grammar is so simple, that we only have to consider two elements
@@ -106,6 +115,7 @@ namespace MUS2.Speech {
         }
       }
     }
+
     private void ShowRecognitionResult(SpeechRecognizedEventArgs e) {
       Debug.WriteLine("--- START recognition results ---");
       // START_WERNER_1
