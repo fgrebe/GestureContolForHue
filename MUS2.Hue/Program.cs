@@ -21,11 +21,7 @@ namespace MUS2.Hue {
       Console.WriteLine("========== Test Philips Hue (Q42.HueApi) ==========");
 
       // Find bridge and register application.
-      IBridgeLocator locator = new HttpBridgeLocator();
-      HueClient client = new HueClient(BRIDGE_IP);
-      client.RegisterAsync(APP_NAME, APP_KEY);
-      client.Initialize(APP_KEY);
-
+      HueClient client = Hue.HueUtil.GetHueClient();
       HueConnectorImpl HueManager = new HueConnectorImpl();
 
       Console.WriteLine("Switching on all");

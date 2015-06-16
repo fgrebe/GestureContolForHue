@@ -9,57 +9,39 @@
   <rule id="ColorAndShape" scope="public">
     <one-of>
       <item>
-        <ruleref uri="#ShapeCmd"/>
+        <ruleref uri="#LampCmd"/>
       </item>
       <item>
         <ruleref uri="#ColorCmd"/>
       </item>
-      <item>
-        <ruleref uri="#GarbageTest"/>
-      </item>
-      <item>
-        <ruleref uri="#AdvancedTest"/>
-      </item>
-      <item>quit</item>
       <item>stop</item>
+      <item>on</item>
+      <item>off</item>
+      <item>red</item>
+      <item>green</item>
+      <item>blue</item>
     </one-of>
   </rule>
-  <rule id="ShapeCmd" scope="private">
-    <item>shape</item>
-    <ruleref uri="#Shapes" />
-    <item repeat="0-1">please</item>
+  <rule id="LampCmd" scope="private">
+    <item>lamp</item>
+    <ruleref uri="#Lamps" />
   </rule>
-  <rule id="Shapes" scope="private">
+  <rule id="Lamps" scope="private">
     <one-of>
-      <item>rectangle</item>
-      <item>line</item>
-      <item>oval</item>
+      <item>one</item>
+      <item>two</item>
+      <item>three</item>
     </one-of>
   </rule>
   <rule id="ColorCmd" scope="private">
     <item>color</item>
     <ruleref uri="#Color" />
-    <item repeat="0-1">please</item>
   </rule>
   <rule id="Color" scope="private">
     <one-of>
       <item>red</item>
       <item>green</item>
       <item>blue</item>
-    </one-of>
-  </rule>
-  <rule id="GarbageTest" scope="private">
-    <item>my name is</item>
-    <ruleref special="GARBAGE" />
-    <item>Gates</item>
-  </rule>
-  <rule id="AdvancedTest" scope="private">
-    <one-of>
-      <item repeat="1-3">attention</item>
-      <item>Colorado</item>
-      <item>Denver</item>
-      <item>San Francisco</item>
-      <token xml:lang="de-at">gehen</token>
     </one-of>
   </rule>
 </grammar>

@@ -60,6 +60,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="HueUtil.cs" />
     <Compile Include="HueConnectorImpl.cs" />
     <Compile Include="IHueConnector.cs" />
     <Compile Include="Program.cs" />

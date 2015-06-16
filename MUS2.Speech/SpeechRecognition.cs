@@ -1,4 +1,6 @@
-﻿using System;
+﻿using MUS2.Hue;
+using Q42.HueApi;
+using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
@@ -80,6 +82,10 @@ namespace MUS2.Speech {
     }
 
     public void grammar_SpeechRecognized(object sender, SpeechRecognizedEventArgs e) {
+      Console.Write("I heard something...");
+      HueClient client = Hue.HueUtil.GetHueClient();
+      HueConnectorImpl HueManager = new HueConnectorImpl();
+
       // show result on console
       //this.ShowRecognitionResult(e);
       // our grammar is so simple, that we only have to consider two elements
@@ -87,6 +93,7 @@ namespace MUS2.Speech {
       RecognizedWordUnit[] unit = e.Result.Words.ToArray();
       RecognizedWordUnit elem0;
       RecognizedWordUnit elem1;
+
       // elem will be the property of the recognized phrase. 
       elem0 = unit[0];
       try {
@@ -97,20 +104,62 @@ namespace MUS2.Speech {
       }
       // check, what has been said
       if (elem0 != null) {
-        if (elem0.Text == "quit") {
-          //this.Dispose( // cross-thread exception
-          //System.Windows.Forms.Application.Exit();
+        if (elem0.Text == "stop") {
+          Console.Write("stop\n...Disabling speech...\n");
+          this.DisableSpeech();
         }
+
+        if (elem0.Text == "on") {
+          Console.Write("on\n");
+          HueManager.SwitchOn(client);
+        }
+
+        if (elem0.Text == "off") {
+          Console.Write("off\n");
+          HueManager.SwitchOff(client);
+        }
+
+        if (elem0.Text == "red") {
+          Console.Write("red\n");
+          HueManager.SetColor("ff0000", client);
+        }
+
+        if (elem0.Text == "green") {
+          Console.Write("green\n");
+          HueManager.SetColor("00cc00", client);
+        }
+
+        if (elem0.Text == "blue") {
+          Console.Write("blue\n");
+          HueManager.SetColor("0000ff", client);
+        }
+
+        if (elem0.Text == "lamp" && elem1 != null) {
+          if (elem1.Text == "one") {
+            Console.WriteLine("lamp one");
+            HueManager.SetColor("ff270d", client);
+          }
+
+          else if (elem1.Text == "two") {
+            Console.WriteLine("lamp two");
+            HueManager.SetColor("ff270d", client);
+          }
+          else if (elem1.Text == "three") {
+            Console.WriteLine("lamp three");
+            HueManager.SetColor("ff270d", client);
+          }
+        }
+
         if (elem0.Text == "color" && elem1 != null) {
           if (elem1.Text == "red") {
-            //do stuff
+            Console.WriteLine("color red");
           }
-            
+           
           else if (elem1.Text == "blue") {
-
+            Console.WriteLine("color blue");
           }
           else if (elem1.Text == "green") {
-
+            Console.WriteLine("color green");
           }           
         }
       }
