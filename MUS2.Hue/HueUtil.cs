@@ -19,7 +19,6 @@ namespace MUS2.Hue {
   // Since:
   //     2015-07-08
   // 
-  //
   public static class HueUtil {
 
     private const string APP_NAME    = "mus";

@@ -1,5 +1,6 @@
 ﻿using Q42.HueApi;
 using System.Collections.Generic;
+
 namespace MUS2.Hue {
 
   //
@@ -12,7 +13,6 @@ namespace MUS2.Hue {
   //
   // Since:
   //     2015-07-08
-  // 
   //
   public class HueConnectorImpl : IHueConnector {
 

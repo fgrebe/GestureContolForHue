@@ -14,7 +14,6 @@ namespace MUS2.Hue {
   // Since:
   //     2015-07-08
   // 
-  //
   public class HueException : Exception {
 
     public HueException(string message) : base(message) {

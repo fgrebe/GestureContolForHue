@@ -16,7 +16,6 @@ namespace MUS2.Hue {
   // Since:
   //     2015-07-08
   // 
-  //
   public interface IHueConnector {
 
     // Switch on/off specific lamps or all if none are specified

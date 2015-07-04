@@ -17,7 +17,6 @@ namespace MUS2.Hue {
   // Since:
   //     2015-07-08
   // 
-  //
   public class Program {
 
     private const int  TIME         = 2000;
