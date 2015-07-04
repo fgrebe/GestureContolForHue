@@ -19,8 +19,9 @@ namespace MUS2.Speech {
     private bool speechInitialized = false;
     private SpeechRecognizer recognizer;
     private Grammar grammar;
+    private const bool REGISTER_APP = false;
 
-    // Standardconstructor
+    // default constructor
     public SpeechRecognition() {
 
     }
@@ -73,7 +74,7 @@ namespace MUS2.Speech {
 
     public void grammar_SpeechRecognized(object sender, SpeechRecognizedEventArgs e) {
       Console.Write("I heard something...");
-      HueClient client = Hue.HueUtil.GetHueClient();
+      HueClient client = HueUtil.GetHueClient(REGISTER_APP);
       HueConnectorImpl HueManager = new HueConnectorImpl();
 
       // show result on console
