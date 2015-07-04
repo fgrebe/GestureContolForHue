@@ -7,6 +7,18 @@ using System.Linq;
 using System.Speech.Recognition;
 
 namespace MUS2.Speech {
+
+  //
+  // Summary:
+  //     Enables to control the hue using the speech recognition API (SAPI).
+  //
+  // Authors:
+  //     Florentina Grebe
+  //     Sabine Winkler
+  //
+  // Since:
+  //     2015-07-08
+  //
   public class SpeechRecognition {
 
     public delegate void SpeechHandler(SpeechRecognition s, SpeechRecognizedEventArgs e);
@@ -19,12 +31,37 @@ namespace MUS2.Speech {
     private bool speechInitialized = false;
     private SpeechRecognizer recognizer;
     private Grammar grammar;
-    private const bool REGISTER_APP = false;
+
+    private const bool   REGISTER_APP = false;
+    private const string GRAMMAR_FILE = @"..\..\Grammar\Grammar.xml";
+
+    #region color constants
+    private const string RED   = "ff0000";
+    private const string GREEN = "00cc00";
+    private const string BLUE  = "0000ff";
+    private const string LAMP  = "ff270d";
+    #endregion 
+    
+    #region command constants
+    private const string CMD_STOP  = "stop";
+    private const string CMD_ON    = "on";
+    private const string CMD_OFF   = "off";
+    private const string CMD_RED   = "red";
+    private const string CMD_GREEN = "green";
+    private const string CMD_BLUE  = "blue";
+    private const string CMD_LAMP  = "lamp";
+    private const string CMD_ONE   = "one";
+    private const string CMD_TWO   = "two";
+    private const string CMD_THREE = "three";
+    private const string CMD_COLOR = "color";
+    #endregion
+
 
     // default constructor
     public SpeechRecognition() {
 
     }
+
 
     public bool EnableSpeech() {
       Debug.WriteLine("enabling speech ...");
@@ -38,8 +75,9 @@ namespace MUS2.Speech {
       return true;
     }
 
+
     public bool DisableSpeech() {
-      Debug.Assert(speechInitialized,"speech must be initialized in DisableSpeech");
+      Debug.Assert(speechInitialized, "speech must be initialized in DisableSpeech");
       if (speechInitialized) {
         // Putting the recognition context to disabled state will 
         // stop speech recognition. Changing the state to enabled 
@@ -51,19 +89,20 @@ namespace MUS2.Speech {
       return true;
     }
 
+
     // Called during EnableSpeech()
     private void InitializeSpeechWithGrammarFile() {
       Debug.WriteLine("Initializing SAPI objects...");
       try {
         recognizer = new SpeechRecognizer();
-        grammar = new Grammar(@"..\..\Grammar\Grammar.xml");
+        grammar = new Grammar(GRAMMAR_FILE);
+
         // Set event handler
         grammar.SpeechRecognized += grammar_SpeechRecognized;
 
         recognizer.LoadGrammar(grammar);
         speechInitialized = true;
-      }
-      catch (Exception e) {
+      } catch (Exception e) {
         Debug.WriteLine(
             "Exception caught when initializing SAPI."
             + " This application may not run correctly.\r\n\r\n"
@@ -72,13 +111,15 @@ namespace MUS2.Speech {
       }
     }
 
+
     public void grammar_SpeechRecognized(object sender, SpeechRecognizedEventArgs e) {
       Console.Write("I heard something...");
       HueClient client = HueUtil.GetHueClient(REGISTER_APP);
-      HueConnectorImpl HueManager = new HueConnectorImpl();
+      HueConnectorImpl hueManager = new HueConnectorImpl();
 
       // show result on console
-      //this.ShowRecognitionResult(e);
+      this.ShowRecognitionResult(e);
+
       // our grammar is so simple, that we only have to consider two elements
       RecognitionResult result = e.Result;
       RecognizedWordUnit[] unit = e.Result.Words.ToArray();
@@ -89,72 +130,69 @@ namespace MUS2.Speech {
       elem0 = unit[0];
       try {
         elem1 = unit[1];
-      }
-      catch (Exception) {
+      } catch (Exception) {
         elem1 = null;
       }
+
       // check, what has been said
       if (elem0 != null) {
-        if (elem0.Text == "stop") {
-          Console.Write("stop\n...Disabling speech...\n");
+        if (elem0.Text == CMD_STOP) {
+          Console.WriteLine(CMD_STOP + "\n...Disabling speech...");
           this.DisableSpeech();
         }
 
-        if (elem0.Text == "on") {
-          Console.Write("on\n");
-          HueManager.SwitchOn(client);
+        if (elem0.Text == CMD_ON) {
+          Console.WriteLine(CMD_ON);
+          hueManager.SwitchOn(client);
         }
 
-        if (elem0.Text == "off") {
-          Console.Write("off\n");
-          HueManager.SwitchOff(client);
+        if (elem0.Text == CMD_OFF) {
+          Console.WriteLine(CMD_OFF);
+          hueManager.SwitchOff(client);
         }
 
-        if (elem0.Text == "red") {
-          Console.Write("red\n");
-          HueManager.SetColor("ff0000", client);
+        if (elem0.Text == CMD_RED) {
+          Console.WriteLine(CMD_RED);
+          hueManager.SetColor(RED, client);
         }
 
-        if (elem0.Text == "green") {
-          Console.Write("green\n");
-          HueManager.SetColor("00cc00", client);
+        if (elem0.Text == CMD_GREEN) {
+          Console.WriteLine(CMD_GREEN);
+          hueManager.SetColor(GREEN, client);
         }
 
-        if (elem0.Text == "blue") {
-          Console.Write("blue\n");
-          HueManager.SetColor("0000ff", client);
+        if (elem0.Text == CMD_BLUE) {
+          Console.WriteLine(CMD_BLUE);
+          hueManager.SetColor(BLUE, client);
         }
 
-        if (elem0.Text == "lamp" && elem1 != null) {
-          if (elem1.Text == "one") {
-            Console.WriteLine("lamp one");
-            HueManager.SetColor("ff270d", client);
-          }
-
-          else if (elem1.Text == "two") {
-            Console.WriteLine("lamp two");
-            HueManager.SetColor("ff270d", client);
-          }
-          else if (elem1.Text == "three") {
-            Console.WriteLine("lamp three");
-            HueManager.SetColor("ff270d", client);
+        // lamp [one | two | three]
+        if (elem0.Text == CMD_LAMP && elem1 != null) {
+          if (elem1.Text == CMD_ONE) {
+            Console.WriteLine(CMD_LAMP + " " + CMD_ONE);
+            hueManager.SetColor(LAMP, client);
+          } else if (elem1.Text == CMD_TWO) {
+            Console.WriteLine(CMD_LAMP + " " + CMD_TWO);
+            hueManager.SetColor(LAMP, client);
+          } else if (elem1.Text == CMD_THREE) {
+            Console.WriteLine(CMD_LAMP + " " + CMD_THREE);
+            hueManager.SetColor(LAMP, client);
           }
         }
 
-        if (elem0.Text == "color" && elem1 != null) {
-          if (elem1.Text == "red") {
-            Console.WriteLine("color red");
+        // color [red | green | blue]
+        if (elem0.Text == CMD_COLOR && elem1 != null) {
+          if (elem1.Text == CMD_RED) {
+            Console.WriteLine(CMD_COLOR + " " + CMD_RED);
+          } else if (elem1.Text == CMD_BLUE) {
+            Console.WriteLine(CMD_COLOR + " " + CMD_BLUE);
+          } else if (elem1.Text == CMD_GREEN) {
+            Console.WriteLine(CMD_COLOR + " " + CMD_GREEN);
           }
-           
-          else if (elem1.Text == "blue") {
-            Console.WriteLine("color blue");
-          }
-          else if (elem1.Text == "green") {
-            Console.WriteLine("color green");
-          }           
         }
       }
     }
+
 
     private void ShowRecognitionResult(SpeechRecognizedEventArgs e) {
       Debug.WriteLine("--- START recognition results ---");
