@@ -2,6 +2,18 @@
 using System.Collections.Generic;
 namespace MUS2.Hue {
 
+  //
+  // Summary:
+  //     Implementation of the hue operations.
+  //
+  // Authors:
+  //     Florentina Grebe
+  //     Sabine Winkler
+  //
+  // Since:
+  //     2015-07-08
+  // 
+  //
   public class HueConnectorImpl : IHueConnector {
 
     public void SendCommandAsync(LightCommand command, HueClient client, List<string> lamps) {
