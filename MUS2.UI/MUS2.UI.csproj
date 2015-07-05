@@ -150,7 +150,6 @@
     <Resource Include="GestureDefinitions\triangle_gesture.xml" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="GestureDefinitions\GestureFabric.CurrentGesatureSet.xml" />
     <Resource Include="GestureDefinitions\GestureFabric.CurrentGestureSet.xml" />
     <Resource Include="GestureDefinitions\RecordedHLine.xml" />
     <Resource Include="GestureDefinitions\SyntheticHLine - Copy.xml" />
