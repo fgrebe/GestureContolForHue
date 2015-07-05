@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<Gesture Name="SyntheticHLine">
+<Gesture Name="Line">
   <Descriptors>
     <PointDescriptor>
       <Points Count="2">

@@ -1,5 +1,7 @@
 ﻿using Q42.HueApi;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace MUS2.Hue {
 
@@ -16,36 +18,66 @@ namespace MUS2.Hue {
   //
   public class HueConnectorImpl : IHueConnector {
 
-    public void SendCommandAsync(LightCommand command, HueClient client, List<string> lamps) {
+    private HueClient client;
+    private bool isOn;
+    private bool isAlertOn;
+    private bool isChaserLightOn;
+    private int currentBrightness;
+
+    private const int MAX_BRIGHTNESS = 255;
+    private const int MIN_BRIGHTNESS = 0;
+
+    private Task chaserLight;
+    private const int CHASER_LIGHT_TIMEOUT = 1000; // 1 second
+
+    public HueConnectorImpl(bool registerApp) {
+      client = HueUtil.GetHueClient(registerApp);
+    }
+
+    private void SendCommandAsync(LightCommand command, List<string> lamps) {
       if (lamps != null)
         client.SendCommandAsync(command, lamps);
       else
         client.SendCommandAsync(command);
     }
 
-    public void SwitchOff(HueClient client, List<string> lamps = null) {
+    public bool IsOn() {
+      return this.isOn;
+    }
+
+    public bool IsAlertOn() {
+      return this.isAlertOn;
+    }
+
+    public bool IsChaserLightOn() {
+      return this.isChaserLightOn;
+    }
+
+    public void SwitchOff(List<string> lamps = null) {
+      isOn = false;
       LightCommand command = new LightCommand();
       command.TurnOff();
-      SendCommandAsync(command, client, lamps);
+      SendCommandAsync(command, lamps);
     }
 
-    public void SwitchOn(HueClient client, List<string> lamps = null) {
+    public void SwitchOn(List<string> lamps = null) {
+      isOn = true;
       var command = new LightCommand();
       command.TurnOn();
-      SendCommandAsync(command, client, lamps);
+      SendCommandAsync(command, lamps);
     }
 
-    public void SetAColorAndBrightness(string color, int brightness, HueClient client, List<string> lamps = null) {
+    public void SetAColorAndBrightness(string color, int brightness, List<string> lamps = null) {
       var command = new LightCommand();
       command.SetColor(color);
       command.Brightness = (byte)brightness; 
-      SendCommandAsync(command, client, lamps); 
+      SendCommandAsync(command, lamps); 
     }
 
-    public void SetColor(string color, HueClient client, List<string> lamps = null) {
+    public void SetColor(string color, List<string> lamps = null) {
       var command = new LightCommand();
       command.SetColor(color);
-      SendCommandAsync(command, client, lamps);   
+      SendCommandAsync(command, lamps);   
     }
 
     /*
@@ -57,16 +89,72 @@ namespace MUS2.Hue {
      *             (note minimum brightness is not off). 
      * hue (a measure of color): runs from 0 to 65535  -> changes color
      */
-    public void SetBrightness(int brightness, HueClient client, List<string> lamps = null) {
-      var command = new LightCommand();
-      command.Brightness = (byte)brightness; 
-      SendCommandAsync(command, client, lamps); 
+    public void SetBrightness(int brightness, List<string> lamps = null) {
+      
+      if (brightness >= MIN_BRIGHTNESS
+          && brightness <= MAX_BRIGHTNESS) {
+        currentBrightness = brightness;
+        var command = new LightCommand();
+        command.Brightness = (byte)brightness;
+        SendCommandAsync(command, lamps); 
+      }
     }
 
-    public void SetEffect(HueClient client, List<string> lamps = null) {
+    public int GetCurrentBrightness() {
+      return this.currentBrightness;
+    }
+
+    public int GetMaxBrightness() {
+      return MAX_BRIGHTNESS;
+    }
+
+    public void SetAlertOn(List<string> lamps = null) {
+      isAlertOn = true;
+      SetAlert(Alert.Multiple, lamps);
+    }
+
+    public void SetAlertOff(List<string> lamps = null) {
+      isAlertOn = false;
+      SetAlert(Alert.None, lamps);
+    }
+
+    public void SetChaserLightOn() {
+      SetChaserLight(true);
+    }
+
+    public void SetChaserLightOff() {
+      SetChaserLight(false);
+    }
+
+    private void SetChaserLight(bool toOn) {
+      if (toOn) {
+        chaserLight = new Task(() => {
+          int lampIndex = 1;
+          isChaserLightOn = true;
+          List<string> lamps = new List<string>();
+
+          while (isChaserLightOn) {
+            lamps.Clear();
+            lamps.Add(lampIndex.ToString());
+            SwitchOn(lamps);
+            Thread.Sleep(CHASER_LIGHT_TIMEOUT);
+            SwitchOff(lamps);
+            Thread.Sleep(CHASER_LIGHT_TIMEOUT);
+            lampIndex = lampIndex % 4;
+            lampIndex++;
+          }
+        });
+
+        chaserLight.Start();
+      } else {
+        isChaserLightOn = false;
+      }
+    }
+
+    private void SetAlert(Alert alert, List<string> lamps = null) {
       var command = new LightCommand();
-      //command.Effect = Effects.ColorLoop;
-      SendCommandAsync(command, client, lamps);
+      command.Alert = alert;
+      SendCommandAsync(command, lamps);
     }
   }
 }

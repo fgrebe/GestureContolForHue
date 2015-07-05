@@ -97,20 +97,12 @@
       <DependentUpon>SmallMainWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="TestSpeech.cs" />
-    <Page Include="MainWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="GestureRecognizer.cs" />
     <Compile Include="KinectDataManager.cs" />
-    <Compile Include="MainWindow.xaml.cs">
-      <DependentUpon>MainWindow.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
     <Page Include="SmallMainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -144,18 +136,23 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="GestureDefinitions\arrow_gesture.xml" />
-    <Resource Include="GestureDefinitions\circle_gesture.xml" />
-    <Resource Include="GestureDefinitions\line_gesture.xml" />
-    <Resource Include="GestureDefinitions\triangle_gesture.xml" />
+    <Resource Include="GestureDefinitions\GestureFabric.CurrentGestureSet.xml" />
+    <Resource Include="GestureDefinitions\SyntheticHLine.short.xml" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="GestureDefinitions\GestureFabric.CurrentGestureSet.xml" />
-    <Resource Include="GestureDefinitions\RecordedHLine.xml" />
-    <Resource Include="GestureDefinitions\SyntheticHLine - Copy.xml" />
-    <Resource Include="GestureDefinitions\SyntheticHLine.short.xml" />
-    <Resource Include="GestureDefinitions\SyntheticHLine.xml" />
-    <Resource Include="GestureDefinitions\test.xml" />
+    <Resource Include="GestureDefinitions\circle_ccw_gesture.xml" />
+    <Resource Include="GestureDefinitions\circle_cw_gesture.xml" />
+    <Resource Include="GestureDefinitions\delete_gesture.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="GestureDefinitions\caret_gesture.xml" />
+    <Resource Include="GestureDefinitions\v_gesture.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MUS2.Hue\MUS2.Hue.csproj">
+      <Project>{79abad06-a79f-4119-ae08-fed82b3e0729}</Project>
+      <Name>MUS2.Hue</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

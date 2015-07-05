@@ -15,12 +15,25 @@ namespace MUS2 {
 
   public delegate void GestureRecognizedEventHandler(ResultList result);
 
+  //
+  // Summary:
+  //     Data manager for the Microsoft Kinect.
+  //
+  // Authors:
+  //     Florentina Grebe
+  //     Sabine Winkler
+  //
+  // Since:
+  //     2015-07-08
+  //
   public class KinectDataManager {
 
-    private const string GESTURE_TRIANGLE_FILE   = @"../../GestureDefinitions/triangle_gesture.xml";
-    private const string GESTURE_CIRCLE_FILE     = @"../../GestureDefinitions/circle_gesture.xml";
-    private const string GESTURE_ARROW_FILE      = @"../../GestureDefinitions/arrow_gesture.xml";
+    private const string GESTURE_CIRCLE_CCW_FILE = @"../../GestureDefinitions/circle_ccw_gesture.xml";
+    private const string GESTURE_CIRCLE_CW_FILE  = @"../../GestureDefinitions/Circle_cw_gesture.xml";
+    private const string GESTURE_DELETE_FILE     = @"../../GestureDefinitions/delete_gesture.xml";
     private const string GESTURE_LINE_FILE       = @"../../GestureDefinitions/SyntheticHLine.short.xml";
+    private const string GESTURE_CARET_FILE      = @"../../GestureDefinitions/caret_gesture.xml";
+    private const string GESTURE_V_FILE          = @"../../GestureDefinitions/v_gesture.xml";
 
     #region Private Members
     private object locker = new Object();
@@ -91,16 +104,23 @@ namespace MUS2 {
     }
 
     private void InitializeGestureRecognition() {
-      Gesture triangleGesture  = FileUtils.ReadGestureFromXml(GESTURE_TRIANGLE_FILE);
-      Gesture circleGesture    = FileUtils.ReadGestureFromXml(GESTURE_CIRCLE_FILE);
-      Gesture arrowGesture     = FileUtils.ReadGestureFromXml(GESTURE_ARROW_FILE);
+      GestureRecognizer.GetInstance().InitializeHue();
+      
+      Gesture circleCcwGesture = FileUtils.ReadGestureFromXml(GESTURE_CIRCLE_CCW_FILE);
+      Gesture circleCwGesture  = FileUtils.ReadGestureFromXml(GESTURE_CIRCLE_CW_FILE);
+      Gesture deleteGesture    = FileUtils.ReadGestureFromXml(GESTURE_DELETE_FILE);
       Gesture lineGesture      = FileUtils.ReadGestureFromXml(GESTURE_LINE_FILE);
+      Gesture caretGesture     = FileUtils.ReadGestureFromXml(GESTURE_CARET_FILE);
+      Gesture vGesture         = FileUtils.ReadGestureFromXml(GESTURE_V_FILE);
       
       GestureSet simpleSet = new GestureSet("SimpleGestureSet");
-      simpleSet.Add(triangleGesture);
-      simpleSet.Add(circleGesture);
-      simpleSet.Add(arrowGesture);
+      simpleSet.Add(circleCcwGesture);
+      simpleSet.Add(circleCwGesture);
+      simpleSet.Add(deleteGesture);
       simpleSet.Add(lineGesture);
+      simpleSet.Add(caretGesture);
+      simpleSet.Add(vGesture);
+
       
       // provide the list of gesture sets for later use (e.g. to be visualized)
       gestureSets = new List<GestureSet>();
@@ -131,12 +151,12 @@ namespace MUS2 {
             double minimumX = double.MaxValue;
             double maximumX = double.MinValue;
             foreach (PointD p in pd.Points) {
-              //Debug.WriteLine("*** :" + "(" + p.X + "," + p.Y + ")");
+              Debug.WriteLine("*** :" + "(" + p.X + "," + p.Y + ")");
               minimumX = Math.Min(minimumX, p.X);
               maximumX = Math.Max(maximumX, p.X);
             }
-            //Debug.WriteLine("*** minimumX: " + minimumX);
-            //Debug.WriteLine("*** maximumX: " + maximumX);
+            Debug.WriteLine("*** minimumX: " + minimumX);
+            Debug.WriteLine("*** maximumX: " + maximumX);
           }
         }
       }

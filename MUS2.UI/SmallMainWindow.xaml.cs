@@ -20,9 +20,23 @@ using System.Windows.Threading;
 
 namespace MUS2.UI {
 
+  //
+  // Summary:
+  //     WPF ui for controlling the hue using Kinect-based gestures
+  //     and Microsoft SAPI speech recognition.
+  //
+  // Authors:
+  //     Florentina Grebe
+  //     Sabine Winkler
+  //
+  // Since:
+  //     2015-07-08
+  //
   public partial class SmallMainWindow : Window {
 
     #region members
+    private const double MIN_SCORE = 0.70; // minimum score a plausible gesture has to reach
+
     KinectDataManager kinectDataMgr;
 
     // color divisors for tinting depth pixels
@@ -864,10 +878,16 @@ namespace MUS2.UI {
     }
 
     void kinectDataMgr_GestureRecognized(ResultList result) {
-      txtTopScore.Text = result.TopResult.Score.ToString();
-      txtRecognizedGesture.Text = result.TopResult.Name;
-      txtGesture.Content = "G: " + result.TopResult.Name + " (" +
-          String.Format("{0:0.00}", result.TopResult.Score) + ")";
+      RecognitionResult topResult = result.TopResult;
+      double score = topResult.Score;
+
+      if (score >= MIN_SCORE) {
+        txtTopScore.Text = score.ToString();
+        GestureRecognizer.GetInstance().PerformHueAction(topResult);
+        txtRecognizedGesture.Text = result.TopResult.Name;
+        txtGesture.Content = "G: " + result.TopResult.Name + " (" +
+            String.Format("{0:0.00}", result.TopResult.Score) + ")";
+      }
     }
 
     private void chkFilterInputGesture_Click(object sender, RoutedEventArgs e) {

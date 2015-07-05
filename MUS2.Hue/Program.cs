@@ -1,5 +1,4 @@
-﻿using Q42.HueApi;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading;
 
@@ -21,45 +20,43 @@ namespace MUS2.Hue {
 
     private const int  TIME         = 2000;
     private const bool REGISTER_APP = false;
-
+    
 
     public static void Main(string[] args) {
 
       Console.WriteLine("========== Test Philips Hue (Q42.HueApi) ==========");
 
       try {
-        HueClient client = HueUtil.GetHueClient(REGISTER_APP);
-      
-        HueConnectorImpl hueManager = new HueConnectorImpl();
+        IHueConnector hueConnector = HueConnectorFactory.GetHueConnector(REGISTER_APP);
 
         Console.WriteLine("Switching on all");
-        hueManager.SwitchOn(client);
+        hueConnector.SwitchOn();
         Thread.Sleep(TIME);
 
         Console.WriteLine("Switching off lamp 1");
-        hueManager.SwitchOff(client, new List<string> { "1" });
+        hueConnector.SwitchOff(new List<string> { "1" });
         Thread.Sleep(TIME);
 
         Console.WriteLine("Switching on all");
-        hueManager.SwitchOn(client);
+        hueConnector.SwitchOn();
         Thread.Sleep(TIME);
 
         Console.WriteLine("Changing color");
-        hueManager.SetColor("ff270d", client);
+        hueConnector.SetColor("ff270d");
         Thread.Sleep(TIME);
 
-        hueManager.SetColor("080a67", client);
+        hueConnector.SetColor("080a67");
         Thread.Sleep(TIME);
 
         Console.WriteLine("Changing brightness");
-        hueManager.SetBrightness(255, client);
+        hueConnector.SetBrightness(255);
         Thread.Sleep(TIME);
 
-        hueManager.SetBrightness(50, client);
+        hueConnector.SetBrightness(50);
         Thread.Sleep(TIME);
 
         Console.WriteLine("Switching off all");
-        hueManager.SwitchOff(client);
+        hueConnector.SwitchOff();
         Thread.Sleep(TIME);
       } catch (HueException e) {
         Console.WriteLine(e.Message);

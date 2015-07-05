@@ -1,5 +1,4 @@
 ﻿using MUS2.Hue;
-using Q42.HueApi;
 using System;
 using System.Diagnostics;
 using System.Drawing;
@@ -114,8 +113,7 @@ namespace MUS2.Speech {
 
     public void grammar_SpeechRecognized(object sender, SpeechRecognizedEventArgs e) {
       Console.Write("I heard something...");
-      HueClient client = HueUtil.GetHueClient(REGISTER_APP);
-      HueConnectorImpl hueManager = new HueConnectorImpl();
+      IHueConnector hueConnector = HueConnectorFactory.GetHueConnector(REGISTER_APP);
 
       // show result on console
       this.ShowRecognitionResult(e);
@@ -143,40 +141,40 @@ namespace MUS2.Speech {
 
         if (elem0.Text == CMD_ON) {
           Console.WriteLine(CMD_ON);
-          hueManager.SwitchOn(client);
+          hueConnector.SwitchOn();
         }
 
         if (elem0.Text == CMD_OFF) {
           Console.WriteLine(CMD_OFF);
-          hueManager.SwitchOff(client);
+          hueConnector.SwitchOff();
         }
 
         if (elem0.Text == CMD_RED) {
           Console.WriteLine(CMD_RED);
-          hueManager.SetColor(RED, client);
+          hueConnector.SetColor(RED);
         }
 
         if (elem0.Text == CMD_GREEN) {
           Console.WriteLine(CMD_GREEN);
-          hueManager.SetColor(GREEN, client);
+          hueConnector.SetColor(GREEN);
         }
 
         if (elem0.Text == CMD_BLUE) {
           Console.WriteLine(CMD_BLUE);
-          hueManager.SetColor(BLUE, client);
+          hueConnector.SetColor(BLUE);
         }
 
         // lamp [one | two | three]
         if (elem0.Text == CMD_LAMP && elem1 != null) {
           if (elem1.Text == CMD_ONE) {
             Console.WriteLine(CMD_LAMP + " " + CMD_ONE);
-            hueManager.SetColor(LAMP, client);
+            hueConnector.SetColor(LAMP);
           } else if (elem1.Text == CMD_TWO) {
             Console.WriteLine(CMD_LAMP + " " + CMD_TWO);
-            hueManager.SetColor(LAMP, client);
+            hueConnector.SetColor(LAMP);
           } else if (elem1.Text == CMD_THREE) {
             Console.WriteLine(CMD_LAMP + " " + CMD_THREE);
-            hueManager.SetColor(LAMP, client);
+            hueConnector.SetColor(LAMP);
           }
         }
 
