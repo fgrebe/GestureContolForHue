@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<Gesture Name="Circle">
+<Gesture Name="Circle(CCW)">
   <Descriptors>
     <PointDescriptor>
       <Points Count="79">
