@@ -6,86 +6,159 @@
         Loaded="Window_Loaded"
         Closed="Window_Closed">
   <Grid>
+    
     <Grid.RowDefinitions>
       <RowDefinition Height="2*"/>
       <RowDefinition Height="4*"/>
     </Grid.RowDefinitions>
+    
     <Grid Grid.Row="0">
+      
       <Grid.RowDefinitions>
         <RowDefinition />
         <RowDefinition Height="0*" />
       </Grid.RowDefinitions>
+      
       <Grid.ColumnDefinitions>
         <ColumnDefinition Width="2.5*" />
         <ColumnDefinition Width="2.5*" />
         <ColumnDefinition Width="2*" />
       </Grid.ColumnDefinitions>
-      <Image Height="240" Width="320"
+      
+      <!-- Depth Image (colored) -->
+      <Image Name="imageDepthColor"
+             Grid.Column="0"
+             Width="320" Height="240"
              HorizontalAlignment="Left" VerticalAlignment="Top"
-             Margin="5,5,0,0" Name="imageDepthColor"
-             Stretch="Fill" Grid.Column="0" />
-      <!-- show skeleton-->
-      <Canvas Name="canvasSkeleton"  Grid.Column="1" Grid.RowSpan="2">
-        <Ellipse Canvas.Left="150" Canvas.Top="0" Height="20" Name="headEllipse" Stroke="Black" Width="20" Fill="Black" />
-        <Ellipse Canvas.Left="150" Canvas.Top="50" Fill="Red" Height="10" Name="shoulderCenterEllipse" Stroke="Red" Width="10" />
-        <Ellipse Canvas.Left="125" Canvas.Top="50" Fill="Red" Height="10" Name="shoulderLeftEllipse" Stroke="Red" Width="10" />
-        <Ellipse Canvas.Left="175" Canvas.Top="50" Fill="Red" Height="10" Name="shoulderRightEllipse" Stroke="Red" Width="10" />
-        <Ellipse Canvas.Left="100" Canvas.Top="50" Fill="Aqua" Height="10" Name="elbowLeftEllipse" Stroke="Aqua" Width="10" />
-        <Ellipse Canvas.Left="200" Canvas.Top="50" Fill="Aqua" Height="10" Name="elbowRightEllipse" Stroke="Aqua" Width="10" />
-        <Ellipse Canvas.Left="80" Canvas.Top="80" Fill="Red" Height="10" Name="wristLeftEllipse" Stroke="Red" Width="10" />
-        <Ellipse Canvas.Left="50" Canvas.Top="80" Fill="SlateGray" Height="25" Name="handLeftEllipse" Stroke="SlateGray" Width="25" />
-        <Ellipse Canvas.Left="230" Canvas.Top="80" Fill="Red" Height="10" Name="wristRightEllipse" Stroke="Red" Width="10" />
-        <Ellipse Canvas.Left="250" Canvas.Top="80" Fill="SlateGray" Height="25" Name="handRightEllipse" Stroke="SlateGray" Width="25" />
-        <Ellipse Canvas.Left="150" Canvas.Top="100" Fill="Red" Height="10" Name="spineEllipse" Stroke="Red" Width="10" />
-        <Ellipse Canvas.Left="150" Canvas.Top="130" Fill="Red" Height="20" Name="hipCenterEllipse" Stroke="Red" Width="20" />
-        <Ellipse Canvas.Left="125" Canvas.Top="130" Fill="Red" Height="10" Name="hipLeftEllipse" Stroke="Red" Width="10" />
-        <Ellipse Canvas.Left="185" Canvas.Top="130" Fill="Red" Height="10" Name="hipRightEllipse" Stroke="Red" Width="10" />
-        <Ellipse Canvas.Left="100" Canvas.Top="160" Fill="Aqua" Height="10" Name="kneeLeftEllipse" Stroke="Aqua" Width="10" />
-        <Ellipse Canvas.Left="200" Canvas.Top="160" Fill="Aqua" Height="10" Name="kneeRightEllipse" Stroke="Aqua" Width="10" />
-        <Ellipse Canvas.Left="80" Canvas.Top="190" Fill="Red" Height="10" Name="ankleLeftEllipse" Stroke="Red" Width="10" />
-        <Ellipse Canvas.Left="230" Canvas.Top="190" Fill="Red" Height="10" Name="ankleRightEllipse" Stroke="Red" Width="10" />
-        <Ellipse Canvas.Left="50" Canvas.Top="220" Fill="BurlyWood" Height="20" Name="footLeftEllipse" Stroke="Black" Width="20" />
-        <Ellipse Canvas.Left="250" Canvas.Top="220" Fill="BurlyWood" Height="20" Name="footRightEllipse" Stroke="Black" Width="20" />
+             Margin="5,5,0,0" Stretch="Fill" />
+      
+      <!-- Skeleton -->
+      <Canvas Name="canvasSkeleton"
+              Grid.Column="1" Grid.RowSpan="2">
+        <Ellipse Canvas.Left="150" Canvas.Top="0"   Fill="Black"     Height="20" Name="headEllipse"            Stroke="Black"     Width="20" />
+        <Ellipse Canvas.Left="150" Canvas.Top="50"  Fill="Red"       Height="10" Name="shoulderCenterEllipse"  Stroke="Red"       Width="10" />
+        <Ellipse Canvas.Left="125" Canvas.Top="50"  Fill="Red"       Height="10" Name="shoulderLeftEllipse"    Stroke="Red"       Width="10" />
+        <Ellipse Canvas.Left="175" Canvas.Top="50"  Fill="Red"       Height="10" Name="shoulderRightEllipse"   Stroke="Red"       Width="10" />
+        <Ellipse Canvas.Left="100" Canvas.Top="50"  Fill="Aqua"      Height="10" Name="elbowLeftEllipse"       Stroke="Aqua"      Width="10" />
+        <Ellipse Canvas.Left="200" Canvas.Top="50"  Fill="Aqua"      Height="10" Name="elbowRightEllipse"      Stroke="Aqua"      Width="10" />
+        <Ellipse Canvas.Left="80"  Canvas.Top="80"  Fill="Red"       Height="10" Name="wristLeftEllipse"       Stroke="Red"       Width="10" />
+        <Ellipse Canvas.Left="50"  Canvas.Top="80"  Fill="SlateGray" Height="25" Name="handLeftEllipse"        Stroke="SlateGray" Width="25" />
+        <Ellipse Canvas.Left="230" Canvas.Top="80"  Fill="Red"       Height="10" Name="wristRightEllipse"      Stroke="Red"       Width="10" />
+        <Ellipse Canvas.Left="250" Canvas.Top="80"  Fill="SlateGray" Height="25" Name="handRightEllipse"       Stroke="SlateGray" Width="25" />
+        <Ellipse Canvas.Left="150" Canvas.Top="100" Fill="Red"       Height="10" Name="spineEllipse"           Stroke="Red"       Width="10" />
+        <Ellipse Canvas.Left="150" Canvas.Top="130" Fill="Red"       Height="20" Name="hipCenterEllipse"       Stroke="Red"       Width="20" />
+        <Ellipse Canvas.Left="125" Canvas.Top="130" Fill="Red"       Height="10" Name="hipLeftEllipse"         Stroke="Red"       Width="10" />
+        <Ellipse Canvas.Left="185" Canvas.Top="130" Fill="Red"       Height="10" Name="hipRightEllipse"        Stroke="Red"       Width="10" />
+        <Ellipse Canvas.Left="100" Canvas.Top="160" Fill="Aqua"      Height="10" Name="kneeLeftEllipse"        Stroke="Aqua"      Width="10" />
+        <Ellipse Canvas.Left="200" Canvas.Top="160" Fill="Aqua"      Height="10" Name="kneeRightEllipse"       Stroke="Aqua"      Width="10" />
+        <Ellipse Canvas.Left="80"  Canvas.Top="190" Fill="Red"       Height="10" Name="ankleLeftEllipse"       Stroke="Red"       Width="10" />
+        <Ellipse Canvas.Left="230" Canvas.Top="190" Fill="Red"       Height="10" Name="ankleRightEllipse"      Stroke="Red"       Width="10" />
+        <Ellipse Canvas.Left="50"  Canvas.Top="220" Fill="BurlyWood" Height="20" Name="footLeftEllipse"        Stroke="Black"     Width="20" />
+        <Ellipse Canvas.Left="250" Canvas.Top="220" Fill="BurlyWood" Height="20" Name="footRightEllipse"       Stroke="Black"     Width="20" />
       </Canvas>
     </Grid>
+    
+    
     <Grid Grid.Row="1" Margin="0,5,0,-5">
+      
       <Grid.ColumnDefinitions>
         <ColumnDefinition Width="1*" />
         <ColumnDefinition Width="5*" />
         <ColumnDefinition Width="6*" />
         <ColumnDefinition Width="6*" />
       </Grid.ColumnDefinitions>
-      <GroupBox Header="BC" Margin="1,1,0,0" HorizontalAlignment="Left" Name="groupBox1" VerticalAlignment="Top"  Grid.Column="0" Grid.ColumnSpan="2">
+
+      <GroupBox Name="groupBoxBC" Header="BC"
+                HorizontalAlignment="Left" VerticalAlignment="Top" 
+                Margin="1,1,0,0"
+                Grid.Column="0" Grid.ColumnSpan="2">
+        
         <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch"  >
+          
           <Grid.ColumnDefinitions>
             <ColumnDefinition Width="40*" />
           </Grid.ColumnDefinitions>
-          <Label Content="Tilt" Height="28" HorizontalAlignment="Left" Margin="3,4,0,0" Name="label4" VerticalAlignment="Top" />
-          <Slider Height="199" HorizontalAlignment="Left" Interval="1" IsSelectionRangeEnabled="True" IsSnapToTickEnabled="True" Margin="10,33,-3,0" Maximum="15" Minimum="-15" Name="sdrElevationAngle" SmallChange="1" TickPlacement="TopLeft" Value="5" ValueChanged="sdrElevationAngle_ValueChanged" VerticalAlignment="Top" Width="36" Orientation="Vertical" />
-          <CheckBox Content="Live" Height="22" HorizontalAlignment="Left" Margin="1,249,0,0" Name="chkLiveRecording" VerticalAlignment="Top" Click="chkLiveRecording_Click" Width="40" />
+
+          <Label Name="labelTilt" Content="Tilt"
+                 HorizontalAlignment="Left" VerticalAlignment="Top"
+                 Height="28" Margin="3,4,0,0" />
+
+          <Slider Name="sdrElevationAngle" Value="5" Maximum="15" Minimum="-15"
+                  Width="36" Height="199" Orientation="Vertical" TickPlacement="TopLeft"
+                  HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,33,-3,0"
+                  Interval="1" IsSelectionRangeEnabled="True" SmallChange="1" IsSnapToTickEnabled="True" 
+                  ValueChanged="sdrElevationAngle_ValueChanged" />
+
+          <CheckBox Name="chkLiveRecording" Content="Live"
+                    Width="40" Height="22" Margin="1,249,0,0"
+                    HorizontalAlignment="Left" VerticalAlignment="Top"
+                    Click="chkLiveRecording_Click" />
         </Grid>
+        
       </GroupBox>
-      <GroupBox Header="Recording"  HorizontalAlignment="Left" Name="groupBox2" VerticalAlignment="Top"  Grid.Column="1" Grid.ColumnSpan="2">
+
+      <GroupBox Name="groupBoxRecording" Header="Recording"
+                HorizontalAlignment="Left" VerticalAlignment="Top"
+                Grid.Column="1" Grid.ColumnSpan="2">
         <Grid>
-          <TextBox Height="39" HorizontalAlignment="Left" Margin="123,141,0,0" Name="txtRecordedPoints" VerticalAlignment="Top" Width="128" Text="0" IsEnabled="False" FontSize="28" />
-          <Label Content="Points" Height="50" HorizontalAlignment="Left" Margin="20,139,0,0" Name="label1" VerticalAlignment="Top" FontSize="28" Width="97" />
-          <Canvas Height="240" HorizontalAlignment="Left" Margin="-50,225,-7,0" Name="canvasRecordedGesture" VerticalAlignment="Top" Width="320" />
+          <TextBox Name="txtRecordedPoints" Text="0"
+                   Width="128" Height="39" FontSize="28"
+                   HorizontalAlignment="Left" VerticalAlignment="Top"
+                   Margin="125,10,0,0" IsEnabled="False" />
+
+          <Label Name="labelPoints" Content="Points"
+                 Width="97" Height="50"
+                 HorizontalAlignment="Left" VerticalAlignment="Top"
+                 Margin="22,8,0,0" FontSize="28" />
+
+          <Canvas Name="canvasRecordedGesture"
+                  Width="320" Height="240" Margin="-50,225,-7,0"
+                  HorizontalAlignment="Left" VerticalAlignment="Top" />
         </Grid>
       </GroupBox>
-      <GroupBox Header="Recognition"  HorizontalAlignment="Left" Name="groupBox3" VerticalAlignment="Top" Grid.Column="2">
+
+      <GroupBox Name="groupBoxRecognition" Header="Recognition" 
+                HorizontalAlignment="Left" VerticalAlignment="Top"
+                Grid.Column="2">
         <Grid>
-          <Canvas Height="240" HorizontalAlignment="Left" Margin="0,36,0,0" Name="canvasPredefinedGestures" VerticalAlignment="Top" Width="320"></Canvas>
-          <Label Content="Predefined Gestures" Height="26" HorizontalAlignment="Left" Margin="10,7,0,0" Name="label5" VerticalAlignment="Top" Width="125" />
-          <TextBox HorizontalAlignment="Right" Margin="0,414,112,30" Name="txtFilterFactorInputData" Text="0,1" Width="82" IsEnabled="False" TextChanged="txtFilterFactorInputData_TextChanged" />
-          <CheckBox Name="chkFilterInputGestureOnline" Content="Filter Online" Height="16" HorizontalAlignment="Left" Margin="23,417,0,0" IsEnabled="False" VerticalAlignment="Top" Click="chkFilterInputGestureOnline_Click" />
+          <Canvas Name="canvasPredefinedGestures"
+                  Height="240" Width="320" Margin="0,36,0,0"
+                  HorizontalAlignment="Left" VerticalAlignment="Top" />
+          
+          <Label Name="labelPredefinedGestures" Content="Predefined Gestures"
+                 Width="125" Height="26" Margin="10,7,0,0"
+                 HorizontalAlignment="Left" VerticalAlignment="Top" />
+          
+          <TextBox Name="txtFilterFactorInputData" Text="0,1" IsEnabled="False"
+                   HorizontalAlignment="Right"
+                   Margin="0,414,112,30" Width="82" 
+                   TextChanged="txtFilterFactorInputData_TextChanged" />
+          
+          <CheckBox Name="chkFilterInputGestureOnline" Content="Filter Online"
+                    HorizontalAlignment="Left" VerticalAlignment="Top"
+                    Height="16" Margin="23,417,0,0" IsEnabled="False"
+                    Click="chkFilterInputGestureOnline_Click" />
         </Grid>
+        
       </GroupBox>
-      <GroupBox Header="Filtering"  HorizontalAlignment="Left" Margin="0,0,0,0" Name="groupBox4" VerticalAlignment="Top" Grid.Column="3">
+
+      <GroupBox Name="groupBoxFiltering" Header="Filtering"
+                HorizontalAlignment="Left" VerticalAlignment="Top"
+                Grid.Column="3">
         <Grid>
-          <Canvas Height="240" Name="canvasFilteredInput" Width="320" Margin="0,10,0,0" VerticalAlignment="Top"/>
-          <Label Name="txtGesture" Foreground="Black" FontSize="28" Visibility="Visible" HorizontalAlignment="Left" Width="300" Margin="0,380,0,0">Gesture:</Label>
+          <Canvas Name="canvasFilteredInput"
+                  VerticalAlignment="Top"
+                  Width="320" Height="240" Margin="0,10,0,0"/>
+          
+          <Label Name="txtGesture" Content="Gesture:"
+                 HorizontalAlignment="Left"
+                 Foreground="Black" FontSize="28"
+                 Width="300" Margin="0,380,0,0" />
         </Grid>
+      
       </GroupBox>
+    
     </Grid>
+  
   </Grid>
 </Window>
