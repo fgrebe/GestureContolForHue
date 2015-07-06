@@ -76,15 +76,7 @@
         <Grid>
           <Canvas Height="240" HorizontalAlignment="Left" Margin="0,36,0,0" Name="canvasPredefinedGestures" VerticalAlignment="Top" Width="320"></Canvas>
           <Label Content="Predefined Gestures" Height="26" HorizontalAlignment="Left" Margin="10,7,0,0" Name="label5" VerticalAlignment="Top" Width="125" />
-          <Label Content="Name:" Height="25" HorizontalAlignment="Left" Margin="20,282,0,0" Name="label9" VerticalAlignment="Top" Width="63" />
-          <TextBlock Height="25" HorizontalAlignment="Right" Margin="0,287,48,0" Name="txtRecognizedGesture" Text="N/A" VerticalAlignment="Top" Width="112" />
-          <Label Content="Top-Score:" Height="25" HorizontalAlignment="Left" Margin="21,307,0,0" Name="label6" VerticalAlignment="Top" Width="76" />
-          <TextBlock Height="25" HorizontalAlignment="Right" Margin="0,313,47,0" Name="txtTopScore" Text="N/A" VerticalAlignment="Top" Width="112" />
-          <Label Content="Duration [ms]:" Height="25" HorizontalAlignment="Left" Margin="20,330,0,0" Name="label8" VerticalAlignment="Top" Width="90" />
-          <TextBlock Height="25" HorizontalAlignment="Right" Margin="0,336,48,0" Name="txtRecDuration" Text="N/A" VerticalAlignment="Top" Width="112" />
-          <TextBox HorizontalAlignment="Right" Margin="0,390,119,54" Name="txtFilterFactorInputData" Text="0,1" Width="82" IsEnabled="False" TextChanged="txtFilterFactorInputData_TextChanged" />
-          <CheckBox Content="Draw Filtered Input" Height="31" HorizontalAlignment="Left" Margin="23,440,0,-1" Name="chkDrawFilteredInputGesture" VerticalAlignment="Top" IsEnabled="False" />
-          <CheckBox Name="chkFilterInputGesture" Content="Filter Offline" Height="16" HorizontalAlignment="Left" Margin="23,393,0,0"  VerticalAlignment="Top" Click="chkFilterInputGesture_Click" />
+          <TextBox HorizontalAlignment="Right" Margin="0,414,112,30" Name="txtFilterFactorInputData" Text="0,1" Width="82" IsEnabled="False" TextChanged="txtFilterFactorInputData_TextChanged" />
           <CheckBox Name="chkFilterInputGestureOnline" Content="Filter Online" Height="16" HorizontalAlignment="Left" Margin="23,417,0,0" IsEnabled="False" VerticalAlignment="Top" Click="chkFilterInputGestureOnline_Click" />
         </Grid>
       </GroupBox>

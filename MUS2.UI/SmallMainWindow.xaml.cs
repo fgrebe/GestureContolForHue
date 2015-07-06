@@ -89,7 +89,6 @@ namespace MUS2.UI {
 
     // recording stuff
     int pointsCount = 0;
-    bool isRecording = false;
     JointType jointToBeDisplayed = JointType.HandRight;
     string recordedDataFilename = null;
 
@@ -512,17 +511,13 @@ namespace MUS2.UI {
       this.pointsCount++;
       //synchronize to the GUI thread
       this.Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Normal, (ThreadStart)delegate() {
-        if (this.chkDrawFilteredInputGesture.IsChecked == true) {
-          DrawJointInCanvas(this.canvasFilteredInput, data, this.blackBrush);
-        } else {
-          DrawJointInCanvas(this.canvasRecordedGesture, data, this.blueBrush);
-        }
+        DrawJointInCanvas(this.canvasRecordedGesture, data, this.blueBrush);
         this.txtRecordedPoints.Text = this.pointsCount.ToString();
       });
 
     }
 
-    private void DrawJointInCanvas(Canvas canvas, KinectUtils.RecorderTypeDefinitions.RecordedSkeletonData data, SolidColorBrush brush) {
+    private void DrawJointInCanvas(Canvas canvas, RecordedSkeletonData data, SolidColorBrush brush) {
       // Draw joints
       // we have all joints, but we just draw one
       RecordedJoint joint = data.Joints[jointToBeDisplayed];
@@ -645,56 +640,14 @@ namespace MUS2.UI {
       expandFactorY = canvas.Height / extentY;
     }
 
-    private void btRecognize_Click(object sender, RoutedEventArgs e) {
-      // apply filter to input data
-      if (chkFilterInputGesture.IsChecked == true) {
-        // filter
-        float smoothingFactor = (float)Double.Parse(txtFilterFactorInputData.Text);
-        this.kinectDataMgr.Recorder.ApplyFilter(new LowpassFilter(smoothingFactor));
-      } else {
-        // export data for use in Excel
-        CsvExporter.Export(@"..\..\unfilteredInput.csv", this.kinectDataMgr.Recorder.GetData());
-      }
-      if (this.chkDrawFilteredInputGesture.IsChecked == true) {
-        // show  data
-        this.pointsCount = 0;
-        this.canvasFilteredInput.Children.Clear();
-        this.canvasRecordedGesture.Children.Clear();
-        this.kinectDataMgr.Recorder.Play();
-      }
-      // recognize gesture
-      TimeSpan start = new TimeSpan(DateTime.Now.Ticks);
-      kinectDataMgr.RecognizeRecordedGesture(jointToBeDisplayed);
-      TimeSpan end = new TimeSpan(DateTime.Now.Ticks);
-      TimeSpan duration = end.Subtract(start);
-      txtRecDuration.Text = duration.Milliseconds.ToString();
-    }
-
     void kinectDataMgr_GestureRecognized(ResultList result) {
       RecognitionResult topResult = result.TopResult;
       double score = topResult.Score;
 
       if (score >= MIN_SCORE) {
-        txtTopScore.Text = score.ToString();
         GestureRecognizer.GetInstance().PerformHueAction(topResult);
-        txtRecognizedGesture.Text = result.TopResult.Name;
-        txtGesture.Content = "G: " + result.TopResult.Name + " (" +
+        txtGesture.Content = "Gesture: " + result.TopResult.Name + " (" +
             String.Format("{0:0.00}", result.TopResult.Score) + ")";
-      }
-    }
-
-    private void chkFilterInputGesture_Click(object sender, RoutedEventArgs e) {
-      if (recordedDataFilename != null) {
-        //kinectDataMgr.Recorder.ClearData();
-        kinectDataMgr.Recorder.LoadDataFromFile(recordedDataFilename);
-        Debug.WriteLine("Recorder.LoadDataFromFile" + recordedDataFilename + ")");
-      }
-      if (chkFilterInputGesture.IsChecked == true) {
-        this.txtFilterFactorInputData.IsEnabled = true;
-        this.chkDrawFilteredInputGesture.IsEnabled = true;
-      } else {
-        this.txtFilterFactorInputData.IsEnabled = false;
-        this.chkDrawFilteredInputGesture.IsEnabled = false;
       }
     }
 
@@ -711,19 +664,8 @@ namespace MUS2.UI {
     
     #region continuous recording and recognition
     private void chkLiveRecording_Click(object sender, RoutedEventArgs e) {
-      if (chkLiveRecording.IsChecked == true) {
-        chkFilterInputGesture.IsEnabled = false;
-        chkFilterInputGestureOnline.IsEnabled = true;
-        chkDrawFilteredInputGesture.IsEnabled = false;
-
-        isLiveRecording = true;
-      } else {
-        chkFilterInputGesture.IsEnabled = true;
-        chkFilterInputGestureOnline.IsEnabled = false;
-        chkDrawFilteredInputGesture.IsEnabled = true;
-
-        isLiveRecording = false;
-      }
+      isLiveRecording = (chkLiveRecording.IsChecked == true);
+      chkFilterInputGestureOnline.IsEnabled = isLiveRecording;
     }
 
     void JointVelocityMonitor_StopMove(double actualSpeed) {
