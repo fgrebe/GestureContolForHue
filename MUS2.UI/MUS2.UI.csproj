@@ -96,7 +96,6 @@
     <Compile Include="SmallMainWindow.xaml.cs">
       <DependentUpon>SmallMainWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="TestSpeech.cs" />
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>

@@ -1,5 +1,4 @@
 ﻿using GestureFabric.Core;
-using GestureFabric.Persistence;
 using KinectUtils.MovementRecorder;
 using KinectUtils.MovementRecorder.GestureFabriceExport;
 using KinectUtils.RecorderTypeDefinitions;
@@ -144,8 +143,6 @@ namespace MUS2.UI {
           // depth stream
           kinectDataMgr.Kinect.DepthStream.Enable(DepthImageFormat.Resolution320x240Fps30);
           kinectDataMgr.Kinect.SkeletonStream.Enable(); // To identify players
-          // process and show raw depth data
-          kinectDataMgr.Kinect.DepthFrameReady += Kinect_DepthFrameReady_Raw;
           // process and show depth stream data with color (color = distance)
           kinectDataMgr.Kinect.DepthFrameReady += Kinect_DepthFrameReady_Colored;
           // process and show skeleton data
@@ -207,96 +204,6 @@ namespace MUS2.UI {
     #region depth data processing
 
     // ############### depth data ##############
-    void Kinect_DepthFrameReady_Raw(object sender, DepthImageFrameReadyEventArgs e) {
-      using (DepthImageFrame depthFrame = e.OpenDepthImageFrame()) {
-        if (depthFrame == null) {
-          return;
-        }
-        byte[] pixels = GenerateColoredBytes(depthFrame);
-        //number of bytes per row width * 4 (B,G,R,Empty)
-        int stride = depthFrame.Width * 4;
-        //create image
-        imageDepthRaw.Source =
-          BitmapSource.Create(depthFrame.Width, depthFrame.Height,
-          96, 96, PixelFormats.Bgr32, null, pixels, stride);
-      }
-    }
-
-    private byte[] GenerateColoredBytes(DepthImageFrame depthFrame) {
-      Int32 playerDistance = 0;
-      //get the raw data from kinect with the depth for every pixel
-      short[] rawDepthData = new short[depthFrame.PixelDataLength];
-      depthFrame.CopyPixelDataTo(rawDepthData);
-
-      //use depthFrame to create the image to display on-screen
-      //depthFrame contains color information for all pixels in image
-      //Height x Width x 4 (Red, Green, Blue, empty byte)
-      Byte[] pixels = new byte[depthFrame.Height * depthFrame.Width * 4];
-
-      //Bgr32  - Blue, Green, Red, empty byte
-      //Bgra32 - Blue, Green, Red, transparency 
-      //You must set transparency for Bgra as .NET defaults a byte to 0 = fully transparent
-
-      //hardcoded locations to Blue, Green, Red (BGR) index positions       
-      const int BlueIndex = 0;
-      const int GreenIndex = 1;
-      const int RedIndex = 2;
-
-
-      //loop through all distances
-      //pick a RGB color based on distance
-      for (int depthIndex = 0, colorIndex = 0;
-          depthIndex < rawDepthData.Length && colorIndex < pixels.Length;
-          depthIndex++, colorIndex += 4) {
-        //get the player (requires skeleton tracking enabled for values)
-        int player = rawDepthData[depthIndex] & DepthImageFrame.PlayerIndexBitmask;
-
-        //gets the depth value
-        int depth = rawDepthData[depthIndex] >> DepthImageFrame.PlayerIndexBitmaskWidth;
-
-        //.9M or 2.95'
-        if (depth <= 900) {
-          //we are very close
-          pixels[colorIndex + BlueIndex] = 255;
-          pixels[colorIndex + GreenIndex] = 0;
-          pixels[colorIndex + RedIndex] = 0;
-        }
-        // .9M - 2M or 2.95' - 6.56'
-        else if (depth > 900 && depth < 2000) {
-          //we are a bit further away
-          pixels[colorIndex + BlueIndex] = 0;
-          pixels[colorIndex + GreenIndex] = 255;
-          pixels[colorIndex + RedIndex] = 0;
-        }
-        // 2M+ or 6.56'+
-        else if (depth > 2000) {
-          //we are the farthest
-          pixels[colorIndex + BlueIndex] = 0;
-          pixels[colorIndex + GreenIndex] = 0;
-          pixels[colorIndex + RedIndex] = 255;
-        }
-
-        //equal coloring for monochromatic histogram
-        byte intensity = CalculateIntensityFromDepth(depth);
-        pixels[colorIndex + BlueIndex] = intensity;
-        pixels[colorIndex + GreenIndex] = intensity;
-        pixels[colorIndex + RedIndex] = intensity;
-
-        //Color all players "gold"
-        if (player > 0 && chkPlayer.IsChecked == true) {
-          pixels[colorIndex + BlueIndex] = Colors.Gold.B;
-          pixels[colorIndex + GreenIndex] = Colors.Gold.G;
-          pixels[colorIndex + RedIndex] = Colors.Gold.R;
-          playerDistance = depth;
-        }
-      }
-      // show player distance
-      // we get mm and convert it to cm
-      playerDistance = playerDistance / 100 * 10; // smooth the values down to centimeters to avoid any flickering
-      txtDistance.Content = "Distance: " + playerDistance.ToString() + " cm";
-      return pixels;
-    }
-
     void Kinect_DepthFrameReady_Colored(object sender, DepthImageFrameReadyEventArgs e) {
       using (DepthImageFrame imageFrame = e.OpenDepthImageFrame()) {
         if (imageFrame != null) {
@@ -456,9 +363,7 @@ namespace MUS2.UI {
             DrawSkeletonConnection(footLeftEllipse, ankleLeftEllipse, ref ankleLeftFootLeftConn);
             DrawSkeletonConnection(footRightEllipse, ankleRightEllipse, ref ankleRightFootRightConn);
 
-            if (this.isRecording) {
-              DoRecording(allSkeletons);
-            } else if (this.isLiveRecording) {
+            if (this.isLiveRecording) {
               DoLiveRecording(allSkeletons);
             }
           }
@@ -573,118 +478,6 @@ namespace MUS2.UI {
 
 
     #region recording
-    private void btnRecordingStart_Click(object sender, RoutedEventArgs e) {
-      isRecording = true;
-      pointsCount = 0;
-      this.kinectDataMgr.Recorder.ClearData();
-      this.canvasRecordedGesture.Children.Clear();
-      this.btnRecordingStart.IsEnabled = false;
-      this.btnRecordingStop.IsEnabled = true;
-      this.btnRecordingSave.IsEnabled = false;
-      this.btnRecordingLoad.IsEnabled = false;
-    }
-
-    private void btnRecordingStop_Click(object sender, RoutedEventArgs e) {
-      isRecording = false;
-      this.btnRecordingStart.IsEnabled = true;
-      this.btnRecordingStop.IsEnabled = false; this.btnRecordingSave.IsEnabled = true;
-      this.btnRecordingLoad.IsEnabled = true;
-    }
-
-    private void btnRecordingSave_Click(object sender, RoutedEventArgs e) {
-      this.btnRecordingSave.IsEnabled = false;
-      // http://msdn.microsoft.com/en-us/library/aa969773.aspx#Y722
-      // Configure save file dialog box
-      Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
-      dlg.FileName = "RecordedGesture"; // Default file name
-      dlg.DefaultExt = ".xml"; // Default file extension
-      dlg.Filter = "XML documents (.xml)|*.xml"; // Filter files by extension
-      dlg.InitialDirectory = @"C:\Users";
-
-      // Show open file dialog box
-      Nullable<bool> result = dlg.ShowDialog();
-      // Process open file dialog box results
-      if (result == true) {
-        // Open document
-        string filename = dlg.FileName;
-        kinectDataMgr.Recorder.SaveDataToFile(filename);
-        ExportRecordedPointsToGestureFabric(@"../../GestureDefinitions/GestureFabric.CurrentGestureSet.xml");
-      }
-    }
-
-    // write xml document in GestureFabric format, so that we can use this data for our gesture description
-    private void ExportRecordedPointsToGestureFabric(string filename) {
-      Gesture ng = GestureFabriceExport.GetGesture(kinectDataMgr.Recorder, "CurrentGesture", jointToBeDisplayed, ProjectionPlane.XY_PLANE);
-      GestureSet gSet = new GestureSet("CurrentGestureSet", ng);
-      gSet.Save(filename);
-    }
-
-    private void btnRecordingLoad_Click(object sender, RoutedEventArgs e) {
-      isRecording = false;
-      // http://msdn.microsoft.com/en-us/library/aa969773.aspx#Y722
-      // Configure open file dialog box
-      Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
-      dlg.FileName = "RecordedGesture"; // Default file name
-      dlg.DefaultExt = ".xml"; // Default file extension
-      dlg.Filter = "XML documents (.xml)|*.xml"; // Filter files by extension
-
-      // Show open file dialog box
-      Nullable<bool> result = dlg.ShowDialog();
-      // Process open file dialog box results
-      if (result == true) {
-        // Open document
-        recordedDataFilename = dlg.FileName; // store filename for later use 
-        // (e.g. reloading data after  filter has been applied
-        kinectDataMgr.Recorder.LoadDataFromFile(recordedDataFilename);
-        this.btnRecordingPlay.IsEnabled = true;
-        this.pointsCount = kinectDataMgr.Recorder.GetData().Count();
-        this.txtRecordedPoints.Text = this.pointsCount.ToString();
-      }
-    }
-
-    private void btnRecordingPlay_Click(object sender, RoutedEventArgs e) {
-      isRecording = false;
-      pointsCount = 0;
-      this.canvasRecordedGesture.Children.Clear();
-      this.canvasFilteredInput.Children.Clear();
-
-      // apply filter to input data
-      if (chkFilterInputGesture.IsChecked == true) {
-        // filter
-        float smoothingFactor = (float)Double.Parse(txtFilterFactorInputData.Text);
-        Debug.WriteLine("smoothingFactor for input data " + smoothingFactor);
-        kinectDataMgr.Recorder.ApplyFilter(new LowpassFilter(smoothingFactor));
-        int no = kinectDataMgr.Recorder.GetData().Count();
-        Debug.WriteLine("remaining data after filtering : " + no);
-      }
-      // show data
-      kinectDataMgr.Recorder.Play();
-    }
-
-    private void cmbRecordingJoint_SelectionChanged(object sender, SelectionChangedEventArgs e) {
-      ComboBoxItem item = (ComboBoxItem)e.AddedItems[0];
-      String value = (String)item.Content;
-      if (value == "Left Hand") {
-        jointToBeDisplayed = JointType.HandLeft;
-      } else if (value == "Right Hand") {
-        jointToBeDisplayed = JointType.HandRight;
-      }
-    }
-
-    private void DoRecording(SkeletonFrame skeletonFrame) {
-      Skeleton[] skeletonArray = new Skeleton[skeletonFrame.SkeletonArrayLength];
-      skeletonFrame.CopySkeletonDataTo(skeletonArray);
-      foreach (Skeleton data in skeletonArray) {
-        // we only show data of tracked joints
-        // if state is not tracked, then we do get lot of useless position data (e.g X/Y 0/0)
-        if (SkeletonTrackingState.Tracked == data.TrackingState) {
-          kinectDataMgr.Recorder.AddSample(data);
-        }
-        // draw new data in canvas
-        recorder_OnNewRecorderSample(new RecordedSkeletonData(data));
-      }
-    }
-
     private void DoLiveRecording(SkeletonFrame skeletonFrame) {
       Skeleton[] skeletonArray = new Skeleton[skeletonFrame.SkeletonArrayLength];
       skeletonFrame.CopySkeletonDataTo(skeletonArray);
@@ -852,7 +645,7 @@ namespace MUS2.UI {
       expandFactorY = canvas.Height / extentY;
     }
 
-    private void btRrecognize_Click(object sender, RoutedEventArgs e) {
+    private void btRecognize_Click(object sender, RoutedEventArgs e) {
       // apply filter to input data
       if (chkFilterInputGesture.IsChecked == true) {
         // filter
@@ -919,8 +712,6 @@ namespace MUS2.UI {
     #region continuous recording and recognition
     private void chkLiveRecording_Click(object sender, RoutedEventArgs e) {
       if (chkLiveRecording.IsChecked == true) {
-        btnRecordingStart.IsEnabled = false;
-        btnRecordingLoad.IsEnabled = false;
         btRrecognize.IsEnabled = false;
         chkFilterInputGesture.IsEnabled = false;
         chkFilterInputGestureOnline.IsEnabled = true;
@@ -928,8 +719,6 @@ namespace MUS2.UI {
 
         isLiveRecording = true;
       } else {
-        btnRecordingStart.IsEnabled = true;
-        btnRecordingLoad.IsEnabled = true;
         btRrecognize.IsEnabled = true;
         chkFilterInputGesture.IsEnabled = true;
         chkFilterInputGestureOnline.IsEnabled = false;
