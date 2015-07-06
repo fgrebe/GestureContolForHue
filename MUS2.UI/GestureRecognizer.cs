@@ -70,6 +70,7 @@ namespace MUS2 {
 
         // switch on/off all lamps
         case GESTURE_DELETE: {
+          hueConnector.SetChaserLightOff();
           if (hueConnector.IsOn()) {
             hueConnector.SwitchOff();
           } else {

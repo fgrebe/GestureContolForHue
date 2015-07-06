@@ -61,6 +61,8 @@ namespace MUS2.Hue {
     }
 
     public void SwitchOn(List<string> lamps = null) {
+      SetAlertOff();
+      
       isOn = true;
       var command = new LightCommand();
       command.TurnOn();
@@ -109,6 +111,8 @@ namespace MUS2.Hue {
     }
 
     public void SetAlertOn(List<string> lamps = null) {
+      SetChaserLightOff();
+
       isAlertOn = true;
       SetAlert(Alert.Multiple, lamps);
     }
@@ -119,6 +123,8 @@ namespace MUS2.Hue {
     }
 
     public void SetChaserLightOn() {
+      SetAlertOff();
+
       SetChaserLight(true);
     }
 
