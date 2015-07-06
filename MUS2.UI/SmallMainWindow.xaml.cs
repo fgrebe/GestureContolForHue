@@ -712,14 +712,12 @@ namespace MUS2.UI {
     #region continuous recording and recognition
     private void chkLiveRecording_Click(object sender, RoutedEventArgs e) {
       if (chkLiveRecording.IsChecked == true) {
-        btRrecognize.IsEnabled = false;
         chkFilterInputGesture.IsEnabled = false;
         chkFilterInputGestureOnline.IsEnabled = true;
         chkDrawFilteredInputGesture.IsEnabled = false;
 
         isLiveRecording = true;
       } else {
-        btRrecognize.IsEnabled = true;
         chkFilterInputGesture.IsEnabled = true;
         chkFilterInputGestureOnline.IsEnabled = false;
         chkDrawFilteredInputGesture.IsEnabled = true;
