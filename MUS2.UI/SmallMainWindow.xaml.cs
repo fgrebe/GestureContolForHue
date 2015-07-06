@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -25,8 +24,8 @@ namespace MUS2.UI {
   //     and Microsoft SAPI speech recognition.
   //
   // Authors:
-  //     Florentina Grebe
-  //     Sabine Winkler
+  //     Werner Kurschl, Philipp Pendelin
+  //     Adapted by Florentina Grebe and Sabine Winkler   
   //
   // Since:
   //     2015-07-08
@@ -34,26 +33,27 @@ namespace MUS2.UI {
   public partial class SmallMainWindow : Window {
 
     #region members
-    private const double MIN_SCORE = 0.70; // minimum score a plausible gesture has to reach
 
     KinectDataManager kinectDataMgr;
 
-    // color divisors for tinting depth pixels
+    #region color divisors for tinting depth pixels
     private static readonly int[] IntensityShiftByPlayerR = { 1, 2, 0, 2, 0, 0, 2, 0 };
     private static readonly int[] IntensityShiftByPlayerG = { 1, 2, 2, 0, 2, 0, 0, 1 };
     private static readonly int[] IntensityShiftByPlayerB = { 1, 0, 2, 2, 0, 2, 0, 2 };
 
-    private const int RedIndex = 2;
+    private const int RedIndex   = 2;
     private const int GreenIndex = 1;
-    private const int BlueIndex = 0;
+    private const int BlueIndex  = 0;
+    #endregion
 
-    // for processing of depth data
+    #region for processing of depth data
     private static readonly int Bgr32BytesPerPixel = (PixelFormats.Bgr32.BitsPerPixel + 7) / 8;
     const float MaxDepthDistance = 4095; // max value returned
     const float MinDepthDistance = 850;  // min value returned
     const float MaxDepthDistanceOffset = MaxDepthDistance - MinDepthDistance;
+    #endregion
 
-    // joint connections
+    #region joint connections
     Path wristLeftElbowLeftConn   = null;
     Path wristRightElbowRightConn = null;
 
@@ -81,19 +81,22 @@ namespace MUS2.UI {
 
     Path ankleLeftFootLeftConn   = null;
     Path ankleRightFootRightConn = null;
+    #endregion
 
+    #region brushes
     SolidColorBrush blackBrush    = new SolidColorBrush();
     SolidColorBrush redBrush      = new SolidColorBrush();
     SolidColorBrush blueBrush     = new SolidColorBrush();
     List<SolidColorBrush> brushes = new List<SolidColorBrush>();
+    #endregion
 
-    // recording stuff
+    #region recording stuff
     int pointsCount = 0;
     JointType jointToBeDisplayed = JointType.HandRight;
     string recordedDataFilename = null;
-
-    // live recording stuff
     bool isLiveRecording = false;
+    #endregion
+
     #endregion
 
 
@@ -104,46 +107,44 @@ namespace MUS2.UI {
 
       // for skeleton and gesture drawing
       blackBrush.Color = Colors.Black;
-      redBrush.Color = Colors.Red;
-      blueBrush.Color = Colors.Blue;
+      redBrush.Color   = Colors.Red;
+      blueBrush.Color  = Colors.Blue;
 
       // some brushes to show gestures in different colors
-      SolidColorBrush b = new SolidColorBrush();
-      b.Color = Colors.Red;
-      this.brushes.Add(b);
-      b = new SolidColorBrush();
-      b.Color = Colors.Black;
-      this.brushes.Add(b);
-      b = new SolidColorBrush();
-      b.Color = Colors.Blue;
-      this.brushes.Add(b);
-      b = new SolidColorBrush();
-      b.Color = Colors.Aqua;
-      this.brushes.Add(b);
-      b.Color = Colors.Yellow;
-      this.brushes.Add(b);
-      b.Color = Colors.Green;
-      this.brushes.Add(b);
+      AddBrush(Colors.Red);
+      AddBrush(Colors.Black);
+      AddBrush(Colors.Blue);
+      AddBrush(Colors.Aqua);
+      AddBrush(Colors.Yellow);
+      AddBrush(Colors.Green);
+    }
+
+    private void AddBrush(Color color) {
+      SolidColorBrush brush = new SolidColorBrush();
+      brush.Color = color;
+      this.brushes.Add(brush);
     }
 
     private void Window_Loaded(object sender, RoutedEventArgs e) {
       try {
-        bool workOffLine = true; // workOffLine means that swe can work without any Kinect device
-        // set this to true, if you do not have a Kinect
-        if (KinectSensor.KinectSensors.Count == 0)
-          workOffLine = true;
-        else
-          workOffLine = false;
+        // if workOffLine is true, we can work without any Kinect device
+        bool workOffLine = (KinectSensor.KinectSensors.Count == 0);
         kinectDataMgr = new KinectDataManager(workOffLine);
+
         if (!workOffLine) {
+          
           kinectDataMgr.Kinect.Start();
+
           // position Kinect in a useful way
           kinectDataMgr.Kinect.ElevationAngle = 5;
+
           // depth stream
           kinectDataMgr.Kinect.DepthStream.Enable(DepthImageFormat.Resolution320x240Fps30);
-          kinectDataMgr.Kinect.SkeletonStream.Enable(); // To identify players
+          kinectDataMgr.Kinect.SkeletonStream.Enable(); // to identify players
+
           // process and show depth stream data with color (color = distance)
           kinectDataMgr.Kinect.DepthFrameReady += Kinect_DepthFrameReady_Colored;
+
           // process and show skeleton data
           kinectDataMgr.Kinect.SkeletonFrameReady += Kinect_SkeletonFrameReady;
         }
@@ -155,59 +156,40 @@ namespace MUS2.UI {
 
       // for recording: show recorded data in view
       kinectDataMgr.Recorder.OnNewRecorderSample +=
-        new KinectUtils.RecorderTypeDefinitions.RecorderSample(recorder_OnNewRecorderSample);
+        new RecorderSample(recorder_OnNewRecorderSample);
 
       // for gesture recognition
       InitializeGestureRecognition();
+
       //gesture recognition handler
-      kinectDataMgr.GestureRecognized += new GestureRecognizedEventHandler(kinectDataMgr_GestureRecognized);
+      kinectDataMgr.GestureRecognized +=
+        new GestureRecognizedEventHandler(kinectDataMgr_GestureRecognized);
 
       // for live recording and recognition
-      kinectDataMgr.JointVelocityMonitor.StartMove += new MovementEventHandler(JointVelocityMonitor_StartMove);
-      kinectDataMgr.JointVelocityMonitor.StopMove += new MovementEventHandler(JointVelocityMonitor_StopMove);
+      kinectDataMgr.JointVelocityMonitor.StartMove +=
+        new MovementEventHandler(JointVelocityMonitor_StartMove);
+      kinectDataMgr.JointVelocityMonitor.StopMove +=
+        new MovementEventHandler(JointVelocityMonitor_StopMove);
     }
 
     private void Window_Closed(object sender, EventArgs e) {
       kinectDataMgr.Kinect.ElevationAngle = 0;
-      if (kinectDataMgr.Kinect.IsRunning)
+      if (kinectDataMgr.Kinect.IsRunning) {
         kinectDataMgr.Kinect.Stop();
-    }
-    #endregion
-
-
-
-    #region video data processing
-
-    // ############### video data ##############
-    void Kinect_ColorFrameReady(object sender, ColorImageFrameReadyEventArgs e) {
-      using (ColorImageFrame colorFrame = e.OpenColorImageFrame()) {
-        if (colorFrame == null) {
-          return;
-        }
-
-        byte[] pixels = new byte[colorFrame.PixelDataLength];
-        colorFrame.CopyPixelDataTo(pixels);
-        int stride = colorFrame.Width * 4;
-        /* imageRaw UI elements has been remove for screen resolution (1024x768) reasons
-                imageRaw.Source =
-                    BitmapSource.Create(colorFrame.Width, colorFrame.Height,
-                    96, 96, PixelFormats.Bgr32, null, pixels, stride);
-         * */
       }
     }
-
     #endregion
     
     
-    
+
     #region depth data processing
 
-    // ############### depth data ##############
     void Kinect_DepthFrameReady_Colored(object sender, DepthImageFrameReadyEventArgs e) {
+      
       using (DepthImageFrame imageFrame = e.OpenDepthImageFrame()) {
+
         if (imageFrame != null) {
 
-          // 
           WriteableBitmap outputBitmap = new WriteableBitmap(
               imageFrame.Width,
               imageFrame.Height,
@@ -222,9 +204,12 @@ namespace MUS2.UI {
 
           byte[] depthFrame32;
           depthFrame32 = new byte[imageFrame.Width * imageFrame.Height * Bgr32BytesPerPixel];
-          // Converts a 16-bit grayscale depth frame which includes player indexes into a 32-bit frame
-          // that displays different players in different colors
-          byte[] convertedDepthBits = this.ConvertDepthFrame(pixelData, depthFrame32, ((KinectSensor)sender).DepthStream);
+          
+          // Converts a 16-bit grayscale depth frame which includes player indexes
+          // into a 32-bit frame that displays different players in different colors
+          byte[] convertedDepthBits =
+            this.ConvertDepthFrame(pixelData, depthFrame32, ((KinectSensor)sender).DepthStream);
+          
           outputBitmap.WritePixels(
               new Int32Rect(0, 0, imageFrame.Width, imageFrame.Height),
               convertedDepthBits,
@@ -239,11 +224,15 @@ namespace MUS2.UI {
     // Converts a 16-bit grayscale depth frame which includes player indexes into a 32-bit frame
     // that displays different players in different colors
     private byte[] ConvertDepthFrame(short[] depthFrame, byte[] depthFrame32, DepthImageStream depthStream) {
+      
       int tooNearDepth = depthStream.TooNearDepth;
       int tooFarDepth = depthStream.TooFarDepth;
       int unknownDepth = depthStream.UnknownDepth;
 
-      for (int i16 = 0, i32 = 0; i16 < depthFrame.Length && i32 < depthFrame32.Length; i16++, i32 += 4) {
+      for (int i16 = 0, i32 = 0;
+               i16 < depthFrame.Length && i32 < depthFrame32.Length;
+               i16++, i32 += 4) {
+        
         int player = depthFrame[i16] & DepthImageFrame.PlayerIndexBitmask;
         int realDepth = depthFrame[i16] >> DepthImageFrame.PlayerIndexBitmaskWidth;
 
@@ -252,29 +241,33 @@ namespace MUS2.UI {
         // The '~' operator is the bitwise negation operator.
         byte intensity = (byte)(~(realDepth >> 4));
 
-        if (player == 0 && realDepth == 0) // too near
-                {
+        if (player == 0 && realDepth == 0) { // too near
+
           // white 
-          depthFrame32[i32 + RedIndex] = 255;
+          depthFrame32[i32 + RedIndex]   = 255;
           depthFrame32[i32 + GreenIndex] = 255;
-          depthFrame32[i32 + BlueIndex] = 255;
-        } else if (player == 0 && realDepth == tooFarDepth) // too far
-                {
+          depthFrame32[i32 + BlueIndex]  = 255;
+
+        } else if (player == 0 && realDepth == tooFarDepth) { // too far
+          
           // blue
-          depthFrame32[i32 + RedIndex] = 0;
+          depthFrame32[i32 + RedIndex]   = 0;
           depthFrame32[i32 + GreenIndex] = 0;
-          depthFrame32[i32 + BlueIndex] = 255;
-        } else if (player == 0 && realDepth == unknownDepth) // unknown
-                {
+          depthFrame32[i32 + BlueIndex]  = 255;
+
+        } else if (player == 0 && realDepth == unknownDepth) { // unknown
+                
           // red
-          depthFrame32[i32 + RedIndex] = 255;
+          depthFrame32[i32 + RedIndex]   = 255;
           depthFrame32[i32 + GreenIndex] = 0;
-          depthFrame32[i32 + BlueIndex] = 0;
+          depthFrame32[i32 + BlueIndex]  = 0;
+
         } else {
+
           // tint the intensity by dividing by per-player values
-          depthFrame32[i32 + RedIndex] = (byte)(intensity >> IntensityShiftByPlayerR[player]);
+          depthFrame32[i32 + RedIndex]   = (byte)(intensity >> IntensityShiftByPlayerR[player]);
           depthFrame32[i32 + GreenIndex] = (byte)(intensity >> IntensityShiftByPlayerG[player]);
-          depthFrame32[i32 + BlueIndex] = (byte)(intensity >> IntensityShiftByPlayerB[player]);
+          depthFrame32[i32 + BlueIndex]  = (byte)(intensity >> IntensityShiftByPlayerB[player]);
         }
       }
       return depthFrame32;
@@ -285,18 +278,20 @@ namespace MUS2.UI {
       return (byte)(255 - (255 * Math.Max(distance - MinDepthDistance, 0)
           / (MaxDepthDistanceOffset)));
     }
+    
     #endregion
     
     
     
     #region skeleton tracking
 
-    // ############### skeleton tracking ##############
     void Kinect_SkeletonFrameReady(object sender, SkeletonFrameReadyEventArgs e) {
+      
       try {
+      
         using (SkeletonFrame allSkeletons = e.OpenSkeletonFrame()) {
-          if (allSkeletons == null)
-            return;
+          if (allSkeletons == null) return;
+
           // get the first tracked skeleton    
           // if state is not tracked, then we do get lot of useless position data (e.g X/Y 0/0)
           Skeleton[] skeletonArray = new Skeleton[allSkeletons.SkeletonArrayLength];
@@ -306,60 +301,74 @@ namespace MUS2.UI {
                                select s).FirstOrDefault();
 
           if (skeleton != null && skeleton.TrackingState == SkeletonTrackingState.Tracked) {
+            
             // move the ellipses in our canvas  to the location of a Joint
             SetJointPosition(headEllipse, skeleton.Joints[JointType.Head]);
+            
             // shoulder
             SetJointPosition(shoulderCenterEllipse, skeleton.Joints[JointType.ShoulderCenter]);
-            SetJointPosition(shoulderLeftEllipse, skeleton.Joints[JointType.ShoulderLeft]);
-            SetJointPosition(shoulderRightEllipse, skeleton.Joints[JointType.ShoulderRight]);
+            SetJointPosition(shoulderLeftEllipse,   skeleton.Joints[JointType.ShoulderLeft]);
+            SetJointPosition(shoulderRightEllipse,  skeleton.Joints[JointType.ShoulderRight]);
+            
             // wrist and hand
-            SetJointPosition(wristLeftEllipse, skeleton.Joints[JointType.WristLeft]);
-            SetJointPosition(handLeftEllipse, skeleton.Joints[JointType.HandLeft]);
+            SetJointPosition(wristLeftEllipse,  skeleton.Joints[JointType.WristLeft]);
+            SetJointPosition(handLeftEllipse,   skeleton.Joints[JointType.HandLeft]);
             SetJointPosition(wristRightEllipse, skeleton.Joints[JointType.WristRight]);
-            SetJointPosition(handRightEllipse, skeleton.Joints[JointType.HandRight]);
+            SetJointPosition(handRightEllipse,  skeleton.Joints[JointType.HandRight]);
+            
             // elbow
-            SetJointPosition(elbowLeftEllipse, skeleton.Joints[JointType.ElbowLeft]);
+            SetJointPosition(elbowLeftEllipse,  skeleton.Joints[JointType.ElbowLeft]);
             SetJointPosition(elbowRightEllipse, skeleton.Joints[JointType.ElbowRight]);
-            SetJointPosition(spineEllipse, skeleton.Joints[JointType.Spine]);
+            SetJointPosition(spineEllipse,      skeleton.Joints[JointType.Spine]);
+            
             // hip
-            SetJointPosition(hipLeftEllipse, skeleton.Joints[JointType.HipLeft]);
-            SetJointPosition(hipRightEllipse, skeleton.Joints[JointType.HipRight]);
+            SetJointPosition(hipLeftEllipse,   skeleton.Joints[JointType.HipLeft]);
+            SetJointPosition(hipRightEllipse,  skeleton.Joints[JointType.HipRight]);
             SetJointPosition(hipCenterEllipse, skeleton.Joints[JointType.HipCenter]);
+            
             // knee
-            SetJointPosition(kneeLeftEllipse, skeleton.Joints[JointType.KneeLeft]);
+            SetJointPosition(kneeLeftEllipse,  skeleton.Joints[JointType.KneeLeft]);
             SetJointPosition(kneeRightEllipse, skeleton.Joints[JointType.KneeRight]);
+            
             // ankle
-            SetJointPosition(ankleLeftEllipse, skeleton.Joints[JointType.AnkleLeft]);
+            SetJointPosition(ankleLeftEllipse,  skeleton.Joints[JointType.AnkleLeft]);
             SetJointPosition(ankleRightEllipse, skeleton.Joints[JointType.AnkleRight]);
+            
             // foot
-            SetJointPosition(footLeftEllipse, skeleton.Joints[JointType.FootLeft]);
+            SetJointPosition(footLeftEllipse,  skeleton.Joints[JointType.FootLeft]);
             SetJointPosition(footRightEllipse, skeleton.Joints[JointType.FootRight]);
 
             // connect specific ellipses
             DrawSkeletonConnection(headEllipse, shoulderCenterEllipse, ref headShoulderCenterConn);
+            
             // shoulder + elbow
-            DrawSkeletonConnection(shoulderCenterEllipse, shoulderLeftEllipse, ref shoulderCenterShoulderLeftConn);
+            DrawSkeletonConnection(shoulderCenterEllipse, shoulderLeftEllipse,  ref shoulderCenterShoulderLeftConn);
             DrawSkeletonConnection(shoulderCenterEllipse, shoulderRightEllipse, ref shoulderCenterShoulderRightConn);
-            DrawSkeletonConnection(elbowLeftEllipse, shoulderLeftEllipse, ref elbowLeftShoulderLeftConn);
-            DrawSkeletonConnection(elbowRightEllipse, shoulderRightEllipse, ref elbowRightShoulderRightConn);
-            DrawSkeletonConnection(shoulderCenterEllipse, spineEllipse, ref shoulderSpineCenterConn);
+            DrawSkeletonConnection(elbowLeftEllipse,      shoulderLeftEllipse,  ref elbowLeftShoulderLeftConn);
+            DrawSkeletonConnection(elbowRightEllipse,     shoulderRightEllipse, ref elbowRightShoulderRightConn);
+            DrawSkeletonConnection(shoulderCenterEllipse, spineEllipse,         ref shoulderSpineCenterConn);
+            
             // wrist + hands
-            DrawSkeletonConnection(wristLeftEllipse, elbowLeftEllipse, ref wristLeftElbowLeftConn);
+            DrawSkeletonConnection(wristLeftEllipse,  elbowLeftEllipse,  ref wristLeftElbowLeftConn);
             DrawSkeletonConnection(wristRightEllipse, elbowRightEllipse, ref wristRightElbowRightConn);
-            DrawSkeletonConnection(wristLeftEllipse, handLeftEllipse, ref handLeftWristLeftConn);
-            DrawSkeletonConnection(wristRightEllipse, handRightEllipse, ref handRightWristRightConn);
+            DrawSkeletonConnection(wristLeftEllipse,  handLeftEllipse,   ref handLeftWristLeftConn);
+            DrawSkeletonConnection(wristRightEllipse, handRightEllipse,  ref handRightWristRightConn);
+            
             // hips
-            DrawSkeletonConnection(hipCenterEllipse, hipLeftEllipse, ref hipCenterhHipLeftConn);
+            DrawSkeletonConnection(hipCenterEllipse, hipLeftEllipse,  ref hipCenterhHipLeftConn);
             DrawSkeletonConnection(hipCenterEllipse, hipRightEllipse, ref hipCenterHipRightConn);
-            DrawSkeletonConnection(hipCenterEllipse, spineEllipse, ref spineHipCenterConn);
+            DrawSkeletonConnection(hipCenterEllipse, spineEllipse,    ref spineHipCenterConn);
+            
             // hips + knees
-            DrawSkeletonConnection(hipLeftEllipse, kneeLeftEllipse, ref hipLeftKneeLeftConn);
+            DrawSkeletonConnection(hipLeftEllipse,  kneeLeftEllipse,  ref hipLeftKneeLeftConn);
             DrawSkeletonConnection(hipRightEllipse, kneeRightEllipse, ref hipRightKneeRightConn);
+            
             // knees + ankles
-            DrawSkeletonConnection(kneeLeftEllipse, ankleLeftEllipse, ref kneeLeftAnkleLeftConn);
+            DrawSkeletonConnection(kneeLeftEllipse,  ankleLeftEllipse,  ref kneeLeftAnkleLeftConn);
             DrawSkeletonConnection(kneeRightEllipse, ankleRightEllipse, ref kneeRightAnkleRightConn);
+            
             // ankle + foot
-            DrawSkeletonConnection(footLeftEllipse, ankleLeftEllipse, ref ankleLeftFootLeftConn);
+            DrawSkeletonConnection(footLeftEllipse,  ankleLeftEllipse,  ref ankleLeftFootLeftConn);
             DrawSkeletonConnection(footRightEllipse, ankleRightEllipse, ref ankleRightFootRightConn);
 
             if (this.isLiveRecording) {
@@ -382,15 +391,18 @@ namespace MUS2.UI {
       Canvas.SetTop(ellipse, (float)((1 - joint.Position.Y) / 2.0 * canvasSkeleton.ActualHeight));
     }
 
-
-    private void DrawSkeletonConnection(FrameworkElement shape1, FrameworkElement shape2, ref Path connection) {
+    private void DrawSkeletonConnection(FrameworkElement shape1, FrameworkElement shape2,
+                                        ref Path connection) {
+      
       GeneralTransform transform1 = shape1.TransformToVisual(shape1.Parent as UIElement);
       GeneralTransform transform2 = shape2.TransformToVisual(shape2.Parent as UIElement);
+      
       // define the geometry of a line
       LineGeometry lineGeometry = new LineGeometry() {
         StartPoint = transform1.Transform(new Point(shape1.ActualWidth / 2, shape1.ActualHeight / 2.0)),
         EndPoint = transform2.Transform(new Point(shape2.ActualWidth / 2.0, shape2.ActualHeight / 2.0))
       };
+      
       // define the path data; which is in fact a line
       Path path = new Path() {
         Data = lineGeometry
@@ -409,88 +421,30 @@ namespace MUS2.UI {
       }
       this.canvasSkeleton.InvalidateVisual();
     }
-    #endregion
     
-    
-    
-    #region basic control
-
-    // ############### basic control ##############
-    bool isElevationTaskOutstanding = false;
-    int targetElevationAngle = 0;
-
-
-    private void sdrElevationAngle_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) {
-      targetElevationAngle = Convert.ToInt32(e.NewValue.ToString());
-      // just for safety, because we get called when GUI is loaded and no nui instance is available
-      if ((kinectDataMgr != null) && (kinectDataMgr.Kinect.Status == KinectStatus.Connected) && (kinectDataMgr.Kinect.IsRunning)) {
-        try {
-          if (!isElevationTaskOutstanding) {
-            StartElevationTask();
-          }
-        } catch (Exception ex) {
-          Debug.WriteLine(ex.Message);
-        }
-      }
-    }
-
-    private void StartElevationTask() {
-      KinectSensor sensor = kinectDataMgr.Kinect;
-      int lastSetElevationAngle = int.MinValue;
-
-      if (sensor != null) {
-        isElevationTaskOutstanding = true;
-        Task.Factory.StartNew(
-          () => {
-            int angleToSet = targetElevationAngle;
-            // Keep adjusting the elevation angle until we "match".
-            while ((lastSetElevationAngle != angleToSet) && sensor.IsRunning) {
-              // Note: Change angle as few times (max 15 times every 20 sec.) as possible and
-              // wait at least 1 sec. after a call. So wee wait 1350 ms.
-              // see: http://msdn.microsoft.com/en-us/library/microsoft.kinect.kinectsensor.elevationangle.aspx
-              sensor.ElevationAngle = angleToSet;  // set new angle
-              lastSetElevationAngle = angleToSet;
-              Thread.Sleep(1350);
-              angleToSet = targetElevationAngle;
-            }
-          }).ContinueWith(
-          results => {
-            if (results.IsFaulted) {
-              var exception = results.Exception;
-              Debug.WriteLine("Set Elevation Task failed with exception: " + exception);
-            }
-            // In case more request to change the evelation angle appeared,
-            // start the task again.
-            this.Dispatcher.BeginInvoke((Action)(() => {
-              if (targetElevationAngle != lastSetElevationAngle) {
-                StartElevationTask();
-              } else {
-                isElevationTaskOutstanding = false;
-              }
-            }));
-          });
-      }
-    }
-
     #endregion
 
 
 
     #region recording
+    
     private void DoLiveRecording(SkeletonFrame skeletonFrame) {
+      
       Skeleton[] skeletonArray = new Skeleton[skeletonFrame.SkeletonArrayLength];
       skeletonFrame.CopySkeletonDataTo(skeletonArray);
+      
       foreach (Skeleton data in skeletonArray) {
+        
         // we only show data of tracked joints
         // if state is not tracked, then we do get lot of useless position data (e.g X/Y 0/0)
         if (SkeletonTrackingState.Tracked == data.TrackingState) {
           kinectDataMgr.Recorder.AddSample(data);
 
-          //new:philipp
           var skeletonData = new RecordedSkeletonData(data);
 
-          if (this.chkFilterInputGestureOnline.IsChecked.HasValue && this.chkFilterInputGestureOnline.IsChecked.Value) {
-            //new:philipp
+          if (this.chkFilterInputGestureOnline.IsChecked.HasValue
+                && this.chkFilterInputGestureOnline.IsChecked.Value) {
+            
             // do online filtering here 
             skeletonData = kinectDataMgr.OnlineLowpassFilter.NextSample(skeletonData);
 
@@ -500,7 +454,8 @@ namespace MUS2.UI {
             });
           }
 
-          // insert data into the JointVelocityMonitor (this data should be filtered, otherwise we get problems when deriving)
+          // insert data into the JointVelocityMonitor
+          // (this data should be filtered, otherwise we get problems when deriving)
           kinectDataMgr.JointVelocityMonitor.AddSample(skeletonData.Joints[jointToBeDisplayed]);
           recorder_OnNewRecorderSample(new RecordedSkeletonData(data));
         }
@@ -508,9 +463,11 @@ namespace MUS2.UI {
     }
 
     void recorder_OnNewRecorderSample(RecordedSkeletonData data) {
+      
       this.pointsCount++;
+
       //synchronize to the GUI thread
-      this.Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Normal, (ThreadStart)delegate() {
+      this.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate() {
         DrawJointInCanvas(this.canvasRecordedGesture, data, this.blueBrush);
         this.txtRecordedPoints.Text = this.pointsCount.ToString();
       });
@@ -518,6 +475,7 @@ namespace MUS2.UI {
     }
 
     private void DrawJointInCanvas(Canvas canvas, RecordedSkeletonData data, SolidColorBrush brush) {
+      
       // Draw joints
       // we have all joints, but we just draw one
       RecordedJoint joint = data.Joints[jointToBeDisplayed];
@@ -535,7 +493,9 @@ namespace MUS2.UI {
       canvas.Children.Add(jointLine);
     }
 
-    private RecordedJointsCollection ConvertToScreenCoordinates(RecordedJointsCollection joints, Canvas canvas) {
+    private RecordedJointsCollection ConvertToScreenCoordinates(
+          RecordedJointsCollection joints, Canvas canvas) {
+
       RecordedJointsCollection convertedJoints = new RecordedJointsCollection();
       foreach (RecordedJoint joint in joints) {
         convertedJoints.Add(ConvertToScreenCoordinates(joint, canvas));
@@ -545,6 +505,7 @@ namespace MUS2.UI {
 
     //convert x and y coordinates to screen size
     private RecordedJoint ConvertToScreenCoordinates(RecordedJoint joint, Canvas canvas) {
+      
       RecordedJoint convertedJoint = new RecordedJoint();
       convertedJoint.ID = joint.ID;
       convertedJoint.Position.X = (float)((joint.Position.X + 1) / 2.0 * canvas.ActualWidth);
@@ -554,6 +515,7 @@ namespace MUS2.UI {
       convertedJoint.Position.Z = joint.Position.Z;
       return convertedJoint;
     }
+    
     #endregion
     
     
@@ -561,10 +523,14 @@ namespace MUS2.UI {
     #region recognition
 
     private void InitializeGestureRecognition() {
+      
       List<SolidColorBrush>.Enumerator e = brushes.GetEnumerator();
+      
       foreach (GestureSet gestureSet in kinectDataMgr.GestureSets) {
         foreach (Gesture gesture in gestureSet.Gestures) {
+          
           if (e.MoveNext() == false) {
+          
             // we have reached the end of the colors so we start over
             e = brushes.GetEnumerator();
             e.MoveNext();
@@ -576,9 +542,12 @@ namespace MUS2.UI {
     }
 
     private void DrawPredefinedGesture(Gesture gesture, Canvas canvas, SolidColorBrush brush) {
+      
       Debug.WriteLine("*** DrawPredefinedGesture: gesture:" + gesture.Name);
       IList<IDescriptor> descriptors = gesture.Descriptors;
+      
       foreach (IDescriptor d in descriptors) {
+       
         if (d is PointDescriptor) {
           PointDescriptor pd = (PointDescriptor)d;
           Debug.WriteLine("*** gesture:" + gesture.Name + " has " + pd.Count + " points");
@@ -588,26 +557,33 @@ namespace MUS2.UI {
     }
 
     private void DrawGestureInCanvas(Canvas canvas, IList<PointD> points, SolidColorBrush brush) {
+      
       // we want to fit the gesture into the canvas, so we have to find factors for the drawing area
       double minX = 0, maxX = 0, minY = 0, maxY = 0;
       double expandFactorX = 1, expandFactorY = 1;
-      findDrawingFactors(canvas, points, ref minX, ref maxX, ref minY, ref maxY, ref expandFactorX, ref expandFactorY);
+      
+      findDrawingFactors(canvas, points,
+                         ref minX, ref maxX, ref minY, ref maxY,
+                         ref expandFactorX, ref expandFactorY);
 
       // define a polyline
       PointCollection pointsToDraw = new PointCollection();
       foreach (PointD p in points) {
+        
         // add points to collection
         double newX = Math.Round(p.X, 2) - Math.Round(minX, 2);
+        
         // mirror it, because 0 is for the X coordinates in the canvas on top, 
         // and for the recorded kinect coordinates on the bottom
         newX = canvas.Height - newX;
 
         double newY = Math.Round(p.Y, 2) - Math.Round(minY, 2);
-        newX = newX * expandFactorX + 12; // why add 12 to get the needed shift to the center? (Werner)
+        newX = newX * expandFactorX + 12;
         newY = newY * expandFactorY;
 
         pointsToDraw.Add(new Point(newX, newY));
       }
+
       Polyline line = new Polyline();
       line.Points = pointsToDraw;
       line.Stroke = brush;
@@ -618,12 +594,15 @@ namespace MUS2.UI {
 
     private void findDrawingFactors(Canvas canvas, IList<PointD> points, ref double minX, ref double maxX,
         ref double minY, ref double maxY, ref double expandFactorX, ref double expandFactorY) {
+      
       // find maximum and minimum of X and Y
       minX = double.MaxValue;
       maxX = double.MinValue;
       minY = double.MaxValue;
       maxY = double.MinValue;
+      
       foreach (PointD p in points) {
+      
         // shift it to a positive value and integer range x
         double x = p.X;
         double y = p.Y;
@@ -641,14 +620,15 @@ namespace MUS2.UI {
     }
 
     void kinectDataMgr_GestureRecognized(ResultList result) {
+      
       RecognitionResult topResult = result.TopResult;
-      double score = topResult.Score;
+      double score       = topResult.Score;
+      string gestureName = topResult.Name;
 
-      if (score >= MIN_SCORE) {
-        GestureRecognizer.GetInstance().PerformHueAction(topResult);
-        txtGesture.Content = "Gesture: " + result.TopResult.Name + " (" +
-            String.Format("{0:0.00}", result.TopResult.Score) + ")";
-      }
+      GestureRecognizer.GetInstance().PerformHueAction(topResult);
+
+      txtGesture.Content = "Gesture: " + gestureName + " (" +
+          String.Format("{0:0.00}", score) + ")";
     }
 
     private void txtFilterFactorInputData_TextChanged(object sender, TextChangedEventArgs e) {
@@ -658,18 +638,20 @@ namespace MUS2.UI {
         Debug.WriteLine("Recorder.LoadDataFromFile" + recordedDataFilename + ")");
       }
     }
+    
     #endregion
     
     
     
     #region continuous recording and recognition
+    
     private void chkLiveRecording_Click(object sender, RoutedEventArgs e) {
       isLiveRecording = (chkLiveRecording.IsChecked == true);
-      chkFilterInputGestureOnline.IsEnabled = isLiveRecording;
     }
 
     void JointVelocityMonitor_StopMove(double actualSpeed) {
       Debug.WriteLine("JointVelocityMonitor_StopMove");
+      
       // now we try to recognize the gesture
       RecognizeRecordedGesture();
       kinectDataMgr.JointVelocityMonitor.Clear();
@@ -677,22 +659,30 @@ namespace MUS2.UI {
 
     void JointVelocityMonitor_StartMove(double actualSpeed) {
       Debug.WriteLine("JointVelocityMonitor_StartMove");
+      
       // we only consider values from now on
       ClearRecordedDataAndViews();
     }
 
     public void RecognizeRecordedGesture() {
+      
       if (this.chkFilterInputGestureOnline.IsChecked == true) {
+
         float smoothingFactor = (float)Double.Parse(txtFilterFactorInputData.Text);
         Debug.WriteLine("smoothingFactor for input data {0}", smoothingFactor);
         kinectDataMgr.Recorder.ApplyFilter(new LowpassFilter(smoothingFactor));
       }
+
       // we only consider one plane (e.g. XY)
-      var gesturePoints = kinectDataMgr.Recorder.GetGesturePoints(jointToBeDisplayed, ProjectionPlane.XY_PLANE);
+      var gesturePoints = kinectDataMgr.Recorder.GetGesturePoints(
+        jointToBeDisplayed, ProjectionPlane.XY_PLANE);
+
       if (gesturePoints.Count > 0) {
+      
         var result = kinectDataMgr.Recognizer.Recognize(gesturePoints);
         kinectDataMgr_GestureRecognized(result);
       }
+
       ClearRecordedDataAndViews();
     }
 
@@ -704,13 +694,10 @@ namespace MUS2.UI {
     }
 
     private void chkFilterInputGestureOnline_Click(object sender, RoutedEventArgs e) {
-      if (chkFilterInputGestureOnline.IsChecked == true) {
-
-        this.txtFilterFactorInputData.IsEnabled = true;
-      } else {
-        this.txtFilterFactorInputData.IsEnabled = false;
-      }
+      this.txtFilterFactorInputData.IsEnabled
+        = (chkFilterInputGestureOnline.IsChecked == true);
     }
+    
     #endregion
 
   }
