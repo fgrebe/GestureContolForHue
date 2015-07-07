@@ -151,6 +151,12 @@ namespace MUS2.Speech {
           case CMD_OFF: {
             cmdText = CMD_OFF;
             Console.WriteLine(cmdText);
+
+            // alert and chaser light should not be on
+            // when the lamps are set to off
+            hueConnector.SetAlertOff();
+            hueConnector.SetChaserLightOff();
+            
             hueConnector.SwitchOff();
             FireSpeechCmdDetected(cmdText);
             break;
