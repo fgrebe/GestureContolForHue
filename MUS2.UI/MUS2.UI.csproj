@@ -152,6 +152,10 @@
       <Project>{79abad06-a79f-4119-ae08-fed82b3e0729}</Project>
       <Name>MUS2.Hue</Name>
     </ProjectReference>
+    <ProjectReference Include="..\MUS2.Speech\MUS2.Speech.csproj">
+      <Project>{dc4d2315-a370-41ef-9420-8e9a11f403ab}</Project>
+      <Name>MUS2.Speech</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
