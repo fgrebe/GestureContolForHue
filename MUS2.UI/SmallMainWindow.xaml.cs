@@ -521,9 +521,18 @@ namespace MUS2.UI {
       }
     }
 
+
+// ##############################################################################################
+// Speech recognition
+// ##############################################################################################
+    
     private void InitializeSpeechRecognition() {
       speechRecognition = new SpeechRecognition();
-      speechRecognition.EnableSpeech(GRAMMAR_FILE); // enables recognition and loads grammar file
+
+      // enables recognition and loads grammar file
+      speechRecognition.EnableSpeech(GRAMMAR_FILE);
+
+      // register a callback method, which is called when a speech command was correctly detected
       speechRecognition.SpeechCmdDetected += speechRecognition_SpeechCmdDetected;
     }
 
@@ -539,6 +548,9 @@ namespace MUS2.UI {
         this.listBoxSpeechCmd.SelectedItem = selectedItem;
       });
     }
+
+// ##############################################################################################
+
 
     private void DrawPredefinedGesture(Gesture gesture, Canvas canvas, SolidColorBrush brush) {
       

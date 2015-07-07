@@ -20,15 +20,14 @@ namespace MUS2 {
   //     Data manager for the Microsoft Kinect.
   //
   // Authors:
-  //     Florentina Grebe
-  //     Sabine Winkler
+  //     Werner Kurschl, Philipp Pendelin
+  //     Adapted by Florentina Grebe and Sabine Winkler   
   //
   // Since:
   //     2015-07-08
   //
   public class KinectDataManager {
 
-    private const string GESTURE_CIRCLE_CCW_FILE = @"../../GestureDefinitions/circle_ccw_gesture.xml";
     private const string GESTURE_CIRCLE_CW_FILE  = @"../../GestureDefinitions/Circle_cw_gesture.xml";
     private const string GESTURE_DELETE_FILE     = @"../../GestureDefinitions/delete_gesture.xml";
     private const string GESTURE_LINE_FILE       = @"../../GestureDefinitions/SyntheticHLine.short.xml";
@@ -106,7 +105,6 @@ namespace MUS2 {
     private void InitializeGestureRecognition() {
       GestureRecognizer.GetInstance().InitializeHue();
       
-      Gesture circleCcwGesture = FileUtils.ReadGestureFromXml(GESTURE_CIRCLE_CCW_FILE);
       Gesture circleCwGesture  = FileUtils.ReadGestureFromXml(GESTURE_CIRCLE_CW_FILE);
       Gesture deleteGesture    = FileUtils.ReadGestureFromXml(GESTURE_DELETE_FILE);
       Gesture lineGesture      = FileUtils.ReadGestureFromXml(GESTURE_LINE_FILE);
@@ -114,7 +112,6 @@ namespace MUS2 {
       Gesture vGesture         = FileUtils.ReadGestureFromXml(GESTURE_V_FILE);
       
       GestureSet simpleSet = new GestureSet("SimpleGestureSet");
-      simpleSet.Add(circleCcwGesture);
       simpleSet.Add(circleCwGesture);
       simpleSet.Add(deleteGesture);
       simpleSet.Add(lineGesture);

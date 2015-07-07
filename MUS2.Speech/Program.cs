@@ -4,7 +4,7 @@ namespace MUS2.Speech {
 
   //
   // Summary:
-  //     Console application to initialize and start the speech recognition.
+  //     Console application to test the speech recognition.
   //
   // Authors:
   //     Florentina Grebe

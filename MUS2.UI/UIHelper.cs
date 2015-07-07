@@ -5,6 +5,17 @@ using System.Windows.Media;
 
 namespace MUS2.UI {
 
+  //
+  // Summary:
+  //     UI helper class, e.g. for creating brushes for the WPF application.
+  //
+  // Authors:
+  //     Florentina Grebe
+  //     Sabine Winkler
+  //
+  // Since:
+  //     2015-07-08
+  //
   public class UIHelper {
     
     private List<SolidColorBrush> brushes;

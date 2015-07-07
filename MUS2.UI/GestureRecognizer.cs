@@ -17,7 +17,6 @@ namespace MUS2 {
   //
   public class GestureRecognizer {
 
-    //private const string GESTURE_CIRCLE_CCW = "Circle(CCW)";
     private const string GESTURE_CIRCLE_CW  = "Circle(CW)";
     private const string GESTURE_DELETE     = "Delete";
     private const string GESTURE_LINE       = "Line";
@@ -52,11 +51,6 @@ namespace MUS2 {
       string gestureName = recognizedGesture.Name;
 
       switch (gestureName) {
-
-        //// start/stop chaser light from right to left
-        //case GESTURE_CIRCLE_CCW: {
-        //  break;
-        //}
 
         // start/stop chaser light from left to right
         case GESTURE_CIRCLE_CW: {

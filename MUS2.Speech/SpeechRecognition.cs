@@ -1,5 +1,6 @@
 ﻿using MUS2.Hue;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
@@ -76,22 +77,6 @@ namespace MUS2.Speech {
       if (speechInitialized == false) {
         InitializeSpeechWithGrammarFile(grammarFile);
       }
-      // recognizer.Enabled = true;
-      // Debug.WriteLine("Recognition state is now: {0} ", recognizer.State);
-      return true;
-    }
-
-
-    public bool DisableSpeech() {
-      Debug.Assert(speechInitialized, "speech must be initialized in DisableSpeech");
-      if (speechInitialized) {
-        // Putting the recognition context to disabled state will 
-        // stop speech recognition. Changing the state to enabled 
-        // will start recognition again.
-        // recognizer.Enabled = false;
-        // Debug.WriteLine("Recognition state is now: {0} ", recognizer.State);
-        Debug.WriteLine("disabling speech ...");
-      }
       return true;
     }
 
@@ -110,6 +95,7 @@ namespace MUS2.Speech {
         recognizer.LoadGrammar(grammar);
         speechInitialized = true;
         recognizer.RecognizeAsync(RecognizeMode.Multiple);
+
       } catch (Exception e) {
         Debug.WriteLine(
             "Exception caught when initializing SAPI."
@@ -200,21 +186,21 @@ namespace MUS2.Speech {
             case CMD_ONE: {
               cmdText = CMD_LAMP + " " + CMD_ONE;
               Console.WriteLine(cmdText);
-              hueConnector.SetColor(LAMP);
+              hueConnector.SetColor(LAMP, new List<string> { "1" });
               FireSpeechCmdDetected(cmdText);
               break;
             }
             case CMD_TWO: {
               cmdText = CMD_LAMP + " " + CMD_TWO;
               Console.WriteLine(cmdText);
-              hueConnector.SetColor(LAMP);
+              hueConnector.SetColor(LAMP, new List<string> { "2" });
               FireSpeechCmdDetected(cmdText);
               break;
             }
             case CMD_THREE: {
               cmdText = CMD_LAMP + " " + CMD_THREE;
               Console.WriteLine(cmdText);
-              hueConnector.SetColor(LAMP);
+              hueConnector.SetColor(LAMP, new List<string> { "3" });
               FireSpeechCmdDetected(cmdText);
               break;
             }
