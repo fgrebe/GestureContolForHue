@@ -7,6 +7,8 @@ using System.Speech.Recognition;
 
 namespace MUS2.Speech {
 
+  public delegate void SpeechCmdDetectedHandler(string cmdText);
+
   //
   // Summary:
   //     Enables to control the hue using the speech recognition API (SAPI).
@@ -20,13 +22,17 @@ namespace MUS2.Speech {
   //
   public class SpeechRecognition {
 
-    public delegate void SpeechHandler(SpeechRecognition s, SpeechRecognizedEventArgs e);
-    public event SpeechHandler sh;
+
+    private SpeechCmdDetectedHandler speechCmdDetected;
+
+    public event SpeechCmdDetectedHandler SpeechCmdDetected {
+      add    { lock (this) speechCmdDetected += value; }
+      remove { lock (this) speechCmdDetected -= value; }
+    }
 
     private Color lampColor;
     private int brightness;
 
-    private bool speechEnabled = true; // activated by checkbox
     private bool speechInitialized = false;
     private SpeechRecognizer recognizer;
     private Grammar grammar;
@@ -64,8 +70,7 @@ namespace MUS2.Speech {
 
     public bool EnableSpeech() {
       Debug.WriteLine("enabling speech ...");
-      Debug.Assert(speechEnabled, "speechEnabled must be true in EnableSpeech");
-
+      
       if (speechInitialized == false) {
         InitializeSpeechWithGrammarFile();
       }
@@ -110,8 +115,14 @@ namespace MUS2.Speech {
       }
     }
 
+    private void FireSpeechCmdDetected(string cmdText) {
+      if (speechCmdDetected != null) {
+        speechCmdDetected(cmdText);
+      }
+    }
 
     public void grammar_SpeechRecognized(object sender, SpeechRecognizedEventArgs e) {
+
       Console.Write("I heard something...");
       IHueConnector hueConnector = HueConnectorFactory.GetHueConnector(REGISTER_APP);
 
@@ -121,74 +132,129 @@ namespace MUS2.Speech {
       // our grammar is so simple, that we only have to consider two elements
       RecognitionResult result = e.Result;
       RecognizedWordUnit[] unit = e.Result.Words.ToArray();
-      RecognizedWordUnit elem0;
-      RecognizedWordUnit elem1;
+      RecognizedWordUnit firstTerm;
+      RecognizedWordUnit secondTerm;
 
-      // elem will be the property of the recognized phrase. 
-      elem0 = unit[0];
+      // ...Term will be the property of the recognized phrase. 
+      firstTerm = unit[0];
       try {
-        elem1 = unit[1];
+        secondTerm = unit[1];
       } catch (Exception) {
-        elem1 = null;
+        secondTerm = null;
       }
 
+      string cmdText = "";
+
       // check, what has been said
-      if (elem0 != null) {
-        if (elem0.Text == CMD_STOP) {
-          Console.WriteLine(CMD_STOP + "\n...Disabling speech...");
-          this.DisableSpeech();
-        }
 
-        if (elem0.Text == CMD_ON) {
-          Console.WriteLine(CMD_ON);
-          hueConnector.SwitchOn();
-        }
+      if (firstTerm != null) {
 
-        if (elem0.Text == CMD_OFF) {
-          Console.WriteLine(CMD_OFF);
-          hueConnector.SwitchOff();
-        }
-
-        if (elem0.Text == CMD_RED) {
-          Console.WriteLine(CMD_RED);
-          hueConnector.SetColor(RED);
-        }
-
-        if (elem0.Text == CMD_GREEN) {
-          Console.WriteLine(CMD_GREEN);
-          hueConnector.SetColor(GREEN);
-        }
-
-        if (elem0.Text == CMD_BLUE) {
-          Console.WriteLine(CMD_BLUE);
-          hueConnector.SetColor(BLUE);
-        }
+        switch (firstTerm.Text) {
+          
+          case CMD_STOP: {
+            cmdText = CMD_STOP;
+            Console.WriteLine(CMD_STOP + "\n...Disabling speech...");
+            this.DisableSpeech();
+            FireSpeechCmdDetected(cmdText);
+            break;
+          }
+          case CMD_ON: {
+            cmdText = CMD_ON;
+            Console.WriteLine(cmdText);
+            hueConnector.SwitchOn();
+            FireSpeechCmdDetected(cmdText);
+            break;
+          }
+          case CMD_OFF: {
+            cmdText = CMD_OFF;
+            Console.WriteLine(cmdText);
+            hueConnector.SwitchOff();
+            FireSpeechCmdDetected(cmdText);
+            break;
+          }
+          case CMD_RED: {
+            cmdText = CMD_RED;
+            Console.WriteLine(cmdText);
+            hueConnector.SetColor(RED);
+            FireSpeechCmdDetected(cmdText);
+            break;
+          }
+          case CMD_GREEN: {
+            cmdText = CMD_GREEN;
+            Console.WriteLine(cmdText);
+            hueConnector.SetColor(GREEN);
+            FireSpeechCmdDetected(cmdText);
+            break;
+          }
+          case CMD_BLUE: {
+            cmdText = CMD_BLUE;
+            Console.WriteLine(cmdText);
+            hueConnector.SetColor(BLUE);
+            FireSpeechCmdDetected(cmdText);
+            break;
+          }
+        } // switch
 
         // lamp [one | two | three]
-        if (elem0.Text == CMD_LAMP && elem1 != null) {
-          if (elem1.Text == CMD_ONE) {
-            Console.WriteLine(CMD_LAMP + " " + CMD_ONE);
-            hueConnector.SetColor(LAMP);
-          } else if (elem1.Text == CMD_TWO) {
-            Console.WriteLine(CMD_LAMP + " " + CMD_TWO);
-            hueConnector.SetColor(LAMP);
-          } else if (elem1.Text == CMD_THREE) {
-            Console.WriteLine(CMD_LAMP + " " + CMD_THREE);
-            hueConnector.SetColor(LAMP);
-          }
+        if (firstTerm.Text == CMD_LAMP && secondTerm != null) {
+          
+          switch (secondTerm.Text) {
+          
+            case CMD_ONE: {
+              cmdText = CMD_LAMP + " " + CMD_ONE;
+              Console.WriteLine(cmdText);
+              hueConnector.SetColor(LAMP);
+              FireSpeechCmdDetected(cmdText);
+              break;
+            }
+            case CMD_TWO: {
+              cmdText = CMD_LAMP + " " + CMD_TWO;
+              Console.WriteLine(cmdText);
+              hueConnector.SetColor(LAMP);
+              FireSpeechCmdDetected(cmdText);
+              break;
+            }
+            case CMD_THREE: {
+              cmdText = CMD_LAMP + " " + CMD_THREE;
+              Console.WriteLine(cmdText);
+              hueConnector.SetColor(LAMP);
+              FireSpeechCmdDetected(cmdText);
+              break;
+            }
+          } // switch
         }
 
         // color [red | green | blue]
-        if (elem0.Text == CMD_COLOR && elem1 != null) {
-          if (elem1.Text == CMD_RED) {
-            Console.WriteLine(CMD_COLOR + " " + CMD_RED);
-          } else if (elem1.Text == CMD_BLUE) {
-            Console.WriteLine(CMD_COLOR + " " + CMD_BLUE);
-          } else if (elem1.Text == CMD_GREEN) {
-            Console.WriteLine(CMD_COLOR + " " + CMD_GREEN);
-          }
+        if (firstTerm.Text == CMD_COLOR && secondTerm != null) {
+          
+          switch (secondTerm.Text) {
+          
+            case CMD_RED: {
+              cmdText = CMD_COLOR + " " + CMD_RED;
+              Console.WriteLine(cmdText);
+              hueConnector.SetColor(RED);
+              FireSpeechCmdDetected(cmdText);
+              break;
+            }
+            case CMD_GREEN: {
+              cmdText = CMD_COLOR + " " + CMD_GREEN;
+              Console.WriteLine(cmdText);
+              hueConnector.SetColor(GREEN);
+              FireSpeechCmdDetected(cmdText);
+              break;
+            }
+            case CMD_BLUE: {
+              cmdText = CMD_COLOR + " " + CMD_BLUE;
+              Console.WriteLine(cmdText);
+              hueConnector.SetColor(BLUE);
+              FireSpeechCmdDetected(cmdText);
+              break;
+            }
+          } // switch
         }
+
       }
+
     }
 
 
