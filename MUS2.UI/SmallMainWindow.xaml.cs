@@ -3,6 +3,7 @@ using KinectUtils.MovementRecorder;
 using KinectUtils.MovementRecorder.GestureFabriceExport;
 using KinectUtils.RecorderTypeDefinitions;
 using Microsoft.Kinect;
+using MUS2.Speech;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -32,9 +33,13 @@ namespace MUS2.UI {
   //
   public partial class SmallMainWindow : Window {
 
+    private const string GRAMMAR_FILE = @"..\..\..\MUS2.Speech\Grammar\Grammar.xml";
+
     #region members
 
     KinectDataManager kinectDataMgr;
+    SpeechRecognition speechRecognition;
+    UIHelper uiHelper;
 
     #region color divisors for tinting depth pixels
     private static readonly int[] IntensityShiftByPlayerR = { 1, 2, 0, 2, 0, 0, 2, 0 };
@@ -83,16 +88,8 @@ namespace MUS2.UI {
     Path ankleRightFootRightConn = null;
     #endregion
 
-    #region brushes
-    SolidColorBrush blackBrush    = new SolidColorBrush();
-    SolidColorBrush redBrush      = new SolidColorBrush();
-    SolidColorBrush blueBrush     = new SolidColorBrush();
-    List<SolidColorBrush> brushes = new List<SolidColorBrush>();
-    #endregion
-
     #region recording stuff
     int pointsCount = 0;
-    JointType jointToBeDisplayed = JointType.HandRight;
     string recordedDataFilename = null;
     bool isLiveRecording = false;
     #endregion
@@ -104,25 +101,8 @@ namespace MUS2.UI {
     #region window
     public SmallMainWindow() {
       InitializeComponent();
-
-      // for skeleton and gesture drawing
-      blackBrush.Color = Colors.Black;
-      redBrush.Color   = Colors.Red;
-      blueBrush.Color  = Colors.Blue;
-
-      // some brushes to show gestures in different colors
-      AddBrush(Colors.Red);
-      AddBrush(Colors.Black);
-      AddBrush(Colors.Blue);
-      AddBrush(Colors.Aqua);
-      AddBrush(Colors.Yellow);
-      AddBrush(Colors.Green);
-    }
-
-    private void AddBrush(Color color) {
-      SolidColorBrush brush = new SolidColorBrush();
-      brush.Color = color;
-      this.brushes.Add(brush);
+      uiHelper = new UIHelper();
+      InitializeSpeechRecognition();
     }
 
     private void Window_Loaded(object sender, RoutedEventArgs e) {
@@ -408,9 +388,9 @@ namespace MUS2.UI {
         Data = lineGeometry
       };
 
-      path.Stroke = blackBrush;
+      path.Stroke = uiHelper.GetBlackBrush();
       path.StrokeThickness = 3;
-      path.Fill = blackBrush;
+      path.Fill = uiHelper.GetBlackBrush();
 
       if (connection == null) {
         connection = path;
@@ -450,13 +430,13 @@ namespace MUS2.UI {
 
             // show live filtering results in filtering window
             this.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate() {
-              DrawJointInCanvas(this.canvasFilteredInput, skeletonData, this.blackBrush);
+              DrawJointInCanvas(this.canvasFilteredInput, skeletonData, uiHelper.GetBlackBrush());
             });
           }
 
           // insert data into the JointVelocityMonitor
           // (this data should be filtered, otherwise we get problems when deriving)
-          kinectDataMgr.JointVelocityMonitor.AddSample(skeletonData.Joints[jointToBeDisplayed]);
+          kinectDataMgr.JointVelocityMonitor.AddSample(skeletonData.Joints[UIHelper.JOINT_TO_BE_DISPlAYED]);
           recorder_OnNewRecorderSample(new RecordedSkeletonData(data));
         }
       }
@@ -468,7 +448,7 @@ namespace MUS2.UI {
 
       //synchronize to the GUI thread
       this.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate() {
-        DrawJointInCanvas(this.canvasRecordedGesture, data, this.blueBrush);
+        DrawJointInCanvas(this.canvasRecordedGesture, data, uiHelper.GetBlueBrush());
         this.txtRecordedPoints.Text = this.pointsCount.ToString();
       });
 
@@ -478,7 +458,7 @@ namespace MUS2.UI {
       
       // Draw joints
       // we have all joints, but we just draw one
-      RecordedJoint joint = data.Joints[jointToBeDisplayed];
+      RecordedJoint joint = data.Joints[UIHelper.JOINT_TO_BE_DISPlAYED];
       Point jointPos;
       //Debug.WriteLine("      recJoint: " + joint.ID + " X/Y" + joint.Position.X + "/" + joint.Position.Y);
       RecordedJoint convertedJoint = ConvertToScreenCoordinates(joint, canvas);
@@ -524,7 +504,7 @@ namespace MUS2.UI {
 
     private void InitializeGestureRecognition() {
       
-      List<SolidColorBrush>.Enumerator e = brushes.GetEnumerator();
+      List<SolidColorBrush>.Enumerator e = uiHelper.GetBrushes().GetEnumerator();
       
       foreach (GestureSet gestureSet in kinectDataMgr.GestureSets) {
         foreach (Gesture gesture in gestureSet.Gestures) {
@@ -532,13 +512,32 @@ namespace MUS2.UI {
           if (e.MoveNext() == false) {
           
             // we have reached the end of the colors so we start over
-            e = brushes.GetEnumerator();
+            e = uiHelper.GetBrushes().GetEnumerator();
             e.MoveNext();
           }
           SolidColorBrush b = e.Current;
           DrawPredefinedGesture(gesture, canvasPredefinedGestures, e.Current);
         }
       }
+    }
+
+    private void InitializeSpeechRecognition() {
+      speechRecognition = new SpeechRecognition();
+      speechRecognition.EnableSpeech(GRAMMAR_FILE); // enables recognition and loads grammar file
+      speechRecognition.SpeechCmdDetected += speechRecognition_SpeechCmdDetected;
+    }
+
+    private void speechRecognition_SpeechCmdDetected(string cmdText) {
+      this.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate() {
+        ListBoxItem selectedItem = null;
+
+        foreach (ListBoxItem item in this.listBoxSpeechCmd.Items) {
+          if (((string)item.Content) == cmdText) {
+            selectedItem = item;
+          }
+        }
+        this.listBoxSpeechCmd.SelectedItem = selectedItem;
+      });
     }
 
     private void DrawPredefinedGesture(Gesture gesture, Canvas canvas, SolidColorBrush brush) {
@@ -627,7 +626,7 @@ namespace MUS2.UI {
 
       GestureRecognizer.GetInstance().PerformHueAction(topResult);
 
-      txtGesture.Content = "Gesture: " + gestureName + " (" +
+      labelGestureValue.Content = gestureName + " (" +
           String.Format("{0:0.00}", score) + ")";
     }
 
@@ -675,7 +674,7 @@ namespace MUS2.UI {
 
       // we only consider one plane (e.g. XY)
       var gesturePoints = kinectDataMgr.Recorder.GetGesturePoints(
-        jointToBeDisplayed, ProjectionPlane.XY_PLANE);
+        UIHelper.JOINT_TO_BE_DISPlAYED, UIHelper.PROJECTION_PLANE);
 
       if (gesturePoints.Count > 0) {
       

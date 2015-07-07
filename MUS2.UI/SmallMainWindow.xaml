@@ -55,9 +55,16 @@
     
         <!-- Speech -->
         <GroupBox Name="groupBoxSpeech" Header="Speech" Grid.Column="2" Margin="10">
-          <ScrollViewer >
-            <TextBlock Name="textBlockSpeechCmd" FontSize="20"/>
-          </ScrollViewer>
+          <ListBox Name="listBoxSpeechCmd" FontSize="18">
+            <ListBoxItem Content="on" />
+            <ListBoxItem Content="off" />
+            <ListBoxItem Content="red" />
+            <ListBoxItem Content="green" />
+            <ListBoxItem Content="blue" />
+            <ListBoxItem Content="lamp one" />
+            <ListBoxItem Content="lamp two" />
+            <ListBoxItem Content="lamp three" />
+          </ListBox>
         </GroupBox>
 
       </Grid>
@@ -112,8 +119,11 @@
                 <TextBox Name="txtRecordedPoints" Text="0" IsEnabled="False"
                          Width="128" FontSize="20" Margin="20,0,0,0" />
               </StackPanel>
-              
-              <Label Name="txtGesture" Content="Gesture:" FontSize="28" Foreground="Red"/>
+
+              <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+                <Label Name="labelGesture"      FontSize="28" Foreground="Red" Content="Gesture:"/>
+                <Label Name="labelGestureValue" FontSize="28" Foreground="Red"/>
+              </StackPanel>
             </StackPanel>
           </GroupBox>
         </Grid>

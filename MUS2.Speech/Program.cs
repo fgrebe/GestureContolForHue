@@ -16,13 +16,14 @@ namespace MUS2.Speech {
   public class Program {
 
     private static ManualResetEvent _completed = null;
+    private const string GRAMMAR_FILE = @"..\..\Grammar\Grammar.xml";
 
     public static void Main(string[] args) {
       _completed = new ManualResetEvent(false);
 
       SpeechRecognition rec = new SpeechRecognition();
-      rec.EnableSpeech();   // enables recognition and loads grammar file
-      _completed.WaitOne(); // wait until speech recognition is completed
+      rec.EnableSpeech(GRAMMAR_FILE); // enables recognition and loads grammar file
+      _completed.WaitOne();           // wait until speech recognition is completed
     }
   }
 }

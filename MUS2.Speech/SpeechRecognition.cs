@@ -12,6 +12,11 @@ namespace MUS2.Speech {
   //
   // Summary:
   //     Enables to control the hue using the speech recognition API (SAPI).
+  //     Use the class SpeechRecognitionEngine instead of SpeechRecognizer.
+  //     SpeechRecognizer may cause problems, when it trys to select elements
+  //     of a WPF app instead of triggering own events.
+  //     See http://stackoverflow.com/questions/5296367/two-problems-with-speech-recognition-c-sharp-wpf-app-on-windows7
+  //     and http://stackoverflow.com/questions/1069577/wpf-listview-programmatically-select-item
   //
   // Authors:
   //     Florentina Grebe
@@ -34,11 +39,10 @@ namespace MUS2.Speech {
     private int brightness;
 
     private bool speechInitialized = false;
-    private SpeechRecognizer recognizer;
+    private SpeechRecognitionEngine recognizer;
     private Grammar grammar;
 
     private const bool   REGISTER_APP = false;
-    private const string GRAMMAR_FILE = @"..\..\Grammar\Grammar.xml";
 
     #region color constants
     private const string RED   = "ff0000";
@@ -48,7 +52,6 @@ namespace MUS2.Speech {
     #endregion 
     
     #region command constants
-    private const string CMD_STOP  = "stop";
     private const string CMD_ON    = "on";
     private const string CMD_OFF   = "off";
     private const string CMD_RED   = "red";
@@ -58,7 +61,6 @@ namespace MUS2.Speech {
     private const string CMD_ONE   = "one";
     private const string CMD_TWO   = "two";
     private const string CMD_THREE = "three";
-    private const string CMD_COLOR = "color";
     #endregion
 
 
@@ -68,14 +70,14 @@ namespace MUS2.Speech {
     }
 
 
-    public bool EnableSpeech() {
+    public bool EnableSpeech(string grammarFile) {
       Debug.WriteLine("enabling speech ...");
       
       if (speechInitialized == false) {
-        InitializeSpeechWithGrammarFile();
+        InitializeSpeechWithGrammarFile(grammarFile);
       }
-      recognizer.Enabled = true;
-      Debug.WriteLine("Recognition state is now: {0} ", recognizer.State);
+      // recognizer.Enabled = true;
+      // Debug.WriteLine("Recognition state is now: {0} ", recognizer.State);
       return true;
     }
 
@@ -86,8 +88,8 @@ namespace MUS2.Speech {
         // Putting the recognition context to disabled state will 
         // stop speech recognition. Changing the state to enabled 
         // will start recognition again.
-        recognizer.Enabled = false;
-        Debug.WriteLine("Recognition state is now: {0} ", recognizer.State);
+        // recognizer.Enabled = false;
+        // Debug.WriteLine("Recognition state is now: {0} ", recognizer.State);
         Debug.WriteLine("disabling speech ...");
       }
       return true;
@@ -95,17 +97,19 @@ namespace MUS2.Speech {
 
 
     // Called during EnableSpeech()
-    private void InitializeSpeechWithGrammarFile() {
+    private void InitializeSpeechWithGrammarFile(string grammarFile) {
       Debug.WriteLine("Initializing SAPI objects...");
       try {
-        recognizer = new SpeechRecognizer();
-        grammar = new Grammar(GRAMMAR_FILE);
+        recognizer = new SpeechRecognitionEngine();
+        grammar = new Grammar(grammarFile);
 
         // Set event handler
         grammar.SpeechRecognized += grammar_SpeechRecognized;
 
+        recognizer.SetInputToDefaultAudioDevice();
         recognizer.LoadGrammar(grammar);
         speechInitialized = true;
+        recognizer.RecognizeAsync(RecognizeMode.Multiple);
       } catch (Exception e) {
         Debug.WriteLine(
             "Exception caught when initializing SAPI."
@@ -151,13 +155,6 @@ namespace MUS2.Speech {
 
         switch (firstTerm.Text) {
           
-          case CMD_STOP: {
-            cmdText = CMD_STOP;
-            Console.WriteLine(CMD_STOP + "\n...Disabling speech...");
-            this.DisableSpeech();
-            FireSpeechCmdDetected(cmdText);
-            break;
-          }
           case CMD_ON: {
             cmdText = CMD_ON;
             Console.WriteLine(cmdText);
@@ -218,35 +215,6 @@ namespace MUS2.Speech {
               cmdText = CMD_LAMP + " " + CMD_THREE;
               Console.WriteLine(cmdText);
               hueConnector.SetColor(LAMP);
-              FireSpeechCmdDetected(cmdText);
-              break;
-            }
-          } // switch
-        }
-
-        // color [red | green | blue]
-        if (firstTerm.Text == CMD_COLOR && secondTerm != null) {
-          
-          switch (secondTerm.Text) {
-          
-            case CMD_RED: {
-              cmdText = CMD_COLOR + " " + CMD_RED;
-              Console.WriteLine(cmdText);
-              hueConnector.SetColor(RED);
-              FireSpeechCmdDetected(cmdText);
-              break;
-            }
-            case CMD_GREEN: {
-              cmdText = CMD_COLOR + " " + CMD_GREEN;
-              Console.WriteLine(cmdText);
-              hueConnector.SetColor(GREEN);
-              FireSpeechCmdDetected(cmdText);
-              break;
-            }
-            case CMD_BLUE: {
-              cmdText = CMD_COLOR + " " + CMD_BLUE;
-              Console.WriteLine(cmdText);
-              hueConnector.SetColor(BLUE);
               FireSpeechCmdDetected(cmdText);
               break;
             }

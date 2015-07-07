@@ -11,10 +11,6 @@
       <item>
         <ruleref uri="#LampCmd"/>
       </item>
-      <item>
-        <ruleref uri="#ColorCmd"/>
-      </item>
-      <item>stop</item>
       <item>on</item>
       <item>off</item>
       <item>red</item>
@@ -31,17 +27,6 @@
       <item>one</item>
       <item>two</item>
       <item>three</item>
-    </one-of>
-  </rule>
-  <rule id="ColorCmd" scope="private">
-    <item>color</item>
-    <ruleref uri="#Color" />
-  </rule>
-  <rule id="Color" scope="private">
-    <one-of>
-      <item>red</item>
-      <item>green</item>
-      <item>blue</item>
     </one-of>
   </rule>
 </grammar>
