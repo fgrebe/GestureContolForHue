@@ -1,0 +1,160 @@
+﻿<Window x:Class="MUS2.UI.SmallMainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Gesture Control for Philips Hue"
+        Height="778" Width="1024"
+        Loaded="Window_Loaded"
+        Closed="Window_Closed">
+  <Grid>
+    
+    <Grid.RowDefinitions>
+      <RowDefinition Height="1*"/>
+      <RowDefinition Height="2*"/>
+    </Grid.RowDefinitions>
+    
+    <Grid Grid.Row="0">
+      
+      <Grid.RowDefinitions>
+        <RowDefinition />
+        <RowDefinition Height="0*" />
+      </Grid.RowDefinitions>
+
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="1*"/>
+          <ColumnDefinition Width="1*"/>
+          <ColumnDefinition Width="1*"/>
+        </Grid.ColumnDefinitions>
+        
+        <!-- Depth Image (colored) -->
+        <Image Name="imageDepthColor" Grid.Column="0" Margin="10" />
+      
+        <!-- Skeleton -->
+        <Canvas Name="canvasSkeleton" Grid.Column="1" Margin="10">
+          <Ellipse Canvas.Left="150" Canvas.Top="0"   Fill="Black"     Height="20" Name="headEllipse"            Stroke="Black"     Width="20" />
+          <Ellipse Canvas.Left="150" Canvas.Top="50"  Fill="Red"       Height="10" Name="shoulderCenterEllipse"  Stroke="Red"       Width="10" />
+          <Ellipse Canvas.Left="125" Canvas.Top="50"  Fill="Red"       Height="10" Name="shoulderLeftEllipse"    Stroke="Red"       Width="10" />
+          <Ellipse Canvas.Left="175" Canvas.Top="50"  Fill="Red"       Height="10" Name="shoulderRightEllipse"   Stroke="Red"       Width="10" />
+          <Ellipse Canvas.Left="100" Canvas.Top="50"  Fill="Aqua"      Height="10" Name="elbowLeftEllipse"       Stroke="Aqua"      Width="10" />
+          <Ellipse Canvas.Left="200" Canvas.Top="50"  Fill="Aqua"      Height="10" Name="elbowRightEllipse"      Stroke="Aqua"      Width="10" />
+          <Ellipse Canvas.Left="80"  Canvas.Top="80"  Fill="Red"       Height="10" Name="wristLeftEllipse"       Stroke="Red"       Width="10" />
+          <Ellipse Canvas.Left="50"  Canvas.Top="80"  Fill="SlateGray" Height="25" Name="handLeftEllipse"        Stroke="SlateGray" Width="25" />
+          <Ellipse Canvas.Left="230" Canvas.Top="80"  Fill="Red"       Height="10" Name="wristRightEllipse"      Stroke="Red"       Width="10" />
+          <Ellipse Canvas.Left="250" Canvas.Top="80"  Fill="SlateGray" Height="25" Name="handRightEllipse"       Stroke="SlateGray" Width="25" />
+          <Ellipse Canvas.Left="150" Canvas.Top="100" Fill="Red"       Height="10" Name="spineEllipse"           Stroke="Red"       Width="10" />
+          <Ellipse Canvas.Left="150" Canvas.Top="130" Fill="Red"       Height="20" Name="hipCenterEllipse"       Stroke="Red"       Width="20" />
+          <Ellipse Canvas.Left="125" Canvas.Top="130" Fill="Red"       Height="10" Name="hipLeftEllipse"         Stroke="Red"       Width="10" />
+          <Ellipse Canvas.Left="185" Canvas.Top="130" Fill="Red"       Height="10" Name="hipRightEllipse"        Stroke="Red"       Width="10" />
+          <Ellipse Canvas.Left="100" Canvas.Top="160" Fill="Aqua"      Height="10" Name="kneeLeftEllipse"        Stroke="Aqua"      Width="10" />
+          <Ellipse Canvas.Left="200" Canvas.Top="160" Fill="Aqua"      Height="10" Name="kneeRightEllipse"       Stroke="Aqua"      Width="10" />
+          <Ellipse Canvas.Left="80"  Canvas.Top="190" Fill="Red"       Height="10" Name="ankleLeftEllipse"       Stroke="Red"       Width="10" />
+          <Ellipse Canvas.Left="230" Canvas.Top="190" Fill="Red"       Height="10" Name="ankleRightEllipse"      Stroke="Red"       Width="10" />
+          <Ellipse Canvas.Left="50"  Canvas.Top="220" Fill="BurlyWood" Height="20" Name="footLeftEllipse"        Stroke="Black"     Width="20" />
+          <Ellipse Canvas.Left="250" Canvas.Top="220" Fill="BurlyWood" Height="20" Name="footRightEllipse"       Stroke="Black"     Width="20" />
+        </Canvas>
+    
+        <!-- Speech -->
+        <GroupBox Name="groupBoxSpeech" Header="Speech" Grid.Column="2" Margin="10">
+          <ListBox Name="listBoxSpeechCmd" FontSize="18">
+            <ListBoxItem Content="on" />
+            <ListBoxItem Content="off" />
+            <ListBoxItem Content="red" />
+            <ListBoxItem Content="green" />
+            <ListBoxItem Content="blue" />
+            <ListBoxItem Content="lamp one" />
+            <ListBoxItem Content="lamp two" />
+            <ListBoxItem Content="lamp three" />
+          </ListBox>
+        </GroupBox>
+
+      </Grid>
+    </Grid>
+    
+    
+    <Grid Grid.Row="1">
+      
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="1*" />
+          <ColumnDefinition Width="1*" />
+        </Grid.ColumnDefinitions>
+        
+        <Grid Grid.Column="0">
+          
+          <Grid.RowDefinitions>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="1*"/>
+          </Grid.RowDefinitions>
+          
+          <GroupBox Name="groupBoxPredefinedGestures" Header="Predefined Gestures" 
+                    Grid.Row="0" Margin="10">
+            <Canvas Name="canvasPredefinedGestures"
+                    Width="320" Height="210" />
+          </GroupBox>
+
+          <GroupBox Name="groupBoxRecording" Header="Recording" Margin="10"
+                    HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                    Grid.Row="1">
+            <StackPanel>
+
+              <CheckBox Name="chkLiveRecording" Content="Live"
+                        FontSize="20" Margin="10,10,0,0"
+                        Click="chkLiveRecording_Click" />
+
+              <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+                <CheckBox Name="chkFilterInputGestureOnline" Content="Filter Online"
+                          FontSize="20" Margin="10,0,0,0"
+                          Click="chkFilterInputGestureOnline_Click" />
+
+                <TextBox Name="txtFilterFactorInputData" Text="0,1" IsEnabled="False"
+                         Width="82" FontSize="20" Margin="20,0,0,0"
+                         TextChanged="txtFilterFactorInputData_TextChanged" />
+              </StackPanel>
+
+              <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+
+                <Label Name="labelPoints" Content="Points:"
+                       FontSize="20" />
+
+                <TextBox Name="txtRecordedPoints" Text="0" IsEnabled="False"
+                         Width="128" FontSize="20" Margin="20,0,0,0" />
+              </StackPanel>
+
+              <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+                <Label Name="labelGesture"      FontSize="28" Foreground="Red" Content="Gesture:"/>
+                <Label Name="labelGestureValue" FontSize="28" Foreground="Red"/>
+              </StackPanel>
+            </StackPanel>
+          </GroupBox>
+        </Grid>
+
+        <Grid Grid.Column="1">
+
+          <Grid.RowDefinitions>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="1*"/>
+          </Grid.RowDefinitions>
+
+          <GroupBox Name="groupBoxRecorded" Header="Recorded" Margin="10"
+                    HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                    Grid.Row="0">
+            <Canvas Name="canvasRecordedGesture"
+                    Width="320" Height="210" />
+          </GroupBox>
+
+          <GroupBox Name="groupBoxFiltered" Header="Filtered" Margin="10"
+                    HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                    Grid.Row="1">
+            <Canvas Name="canvasFilteredInput"
+                    Width="320" Height="210" />
+          </GroupBox>
+
+        </Grid>
+      
+      </Grid>
+    
+    </Grid>
+  
+  </Grid>
+  
+</Window>

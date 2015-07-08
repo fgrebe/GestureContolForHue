@@ -1,0 +1,32 @@
+﻿<!-- W3C Speech Recognition Grammar Specification Version 1.0: http://www.w3.org/TR/speech-grammar/ -->
+<!-- Text Grammar Format Overview: http://msdn.microsoft.com/en-us/library/ms870145.aspx -->
+<!--- the list of tags is descriped also here: http://msdn.microsoft.com/en-us/library/ms870140.aspx -->
+
+<grammar root="ColorAndLamp" version="1.0" xmlns="http://www.w3.org/2001/06/grammar"
+ xml:lang="en-US" tag-format="semantics-ms/1.0">
+  <!-- private: The rule is visible only within its containing grammar; -->
+  <!-- public rules can be referenced by external grammars -->
+  <rule id="ColorAndLamp" scope="public">
+    <one-of>
+      <item>
+        <ruleref uri="#LampCmd"/>
+      </item>
+      <item>on</item>
+      <item>off</item>
+      <item>red</item>
+      <item>green</item>
+      <item>blue</item>
+    </one-of>
+  </rule>
+  <rule id="LampCmd" scope="private">
+    <item>lamp</item>
+    <ruleref uri="#Lamps" />
+  </rule>
+  <rule id="Lamps" scope="private">
+    <one-of>
+      <item>one</item>
+      <item>two</item>
+      <item>three</item>
+    </one-of>
+  </rule>
+</grammar>
